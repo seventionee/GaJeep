@@ -120,7 +120,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ), // increase the minimum width and height
             ),
             child: const Text(
-              'Learn More',
+              'What is GaJeep?',
               style: TextStyle(
                 fontFamily: 'Epilogue', //font style
                 fontWeight: FontWeight.w400,
