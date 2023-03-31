@@ -60,8 +60,8 @@ class _MyHomePageState extends State<MyHomePage> {
         Image.asset(
           'asset/logo/gajeep_logo1.png',
           fit: BoxFit.cover,
-          width: 300,
-          height: 300,
+          width: 250,
+          height: 250,
         ),
         const SizedBox(height: 30.0),
         Container(
@@ -120,7 +120,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ), // increase the minimum width and height
             ),
             child: const Text(
-              'What is GaJeep?',
+              'Learn More',
               style: TextStyle(
                 fontFamily: 'Epilogue', //font style
                 fontWeight: FontWeight.w400,
