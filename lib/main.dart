@@ -60,6 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
         Image.asset(
           'asset/logo/gajeep_logo1.png',
           fit: BoxFit.cover,
+
           width: 250,
           height: 250,
         ),
