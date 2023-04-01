@@ -17,15 +17,6 @@
     ]
   },
   {
-    "featureType": "landscape",
-    "elementType": "geometry.stroke",
-    "stylers": [
-      {
-        "color": "#000000"
-      }
-    ]
-  },
-  {
     "featureType": "poi",
     "stylers": [
       {
@@ -64,7 +55,7 @@
     "featureType": "poi.attraction",
     "stylers": [
       {
-        "visibility": "off"
+        "visibility": "simplified"
       }
     ]
   },
@@ -81,7 +72,7 @@
     "featureType": "poi.business",
     "stylers": [
       {
-        "visibility": "on"
+        "visibility": "simplified"
       }
     ]
   },
@@ -114,7 +105,7 @@
   },
   {
     "featureType": "road",
-    "elementType": "geometry.fill",
+    "elementType": "geometry.stroke",
     "stylers": [
       {
         "color": "#f8bb28"
