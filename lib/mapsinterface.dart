@@ -80,6 +80,9 @@ class _Mapsinterface extends State<Mapsinterface> {
                 target: LatLng(10.3156173, 123.882969),
                 zoom: 19,
               ),
+              zoomControlsEnabled: false, // Remove zoom controls
+              myLocationButtonEnabled: false, // Remove location button
+              mapToolbarEnabled: false,
             ),
             floatingActionButton: FloatingActionButton(
               backgroundColor: Theme.of(context).colorScheme.secondary,
