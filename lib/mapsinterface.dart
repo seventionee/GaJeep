@@ -4,12 +4,10 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:search_map_place_updated/search_map_place_updated.dart';
 
-// ignore: use_key_in_widget_constructors
 class Mapsinterface extends StatefulWidget {
   static const routeName = '/mapsinterface';
-
+  const Mapsinterface({Key? key}) : super(key: key);
   @override
   createState() => _Mapsinterface();
 }
@@ -92,7 +90,7 @@ class _Mapsinterface extends State<Mapsinterface> {
                 ),
                 Positioned(
                   bottom: 16,
-                  right: 16,
+                  left: 16,
                   child: FloatingActionButton(
                     backgroundColor: Theme.of(context).colorScheme.secondary,
                     onPressed: _showUserLocation,

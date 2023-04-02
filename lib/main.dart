@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
       home: const SplashScreen(), // set SplashScreen as the initial screen
       routes: {
         LearnMorePage.routeName: (context) => const LearnMorePage(),
-        Mapsinterface.routeName: (context) => Mapsinterface(),
+        Mapsinterface.routeName: (context) => const Mapsinterface(),
       },
     );
   }
