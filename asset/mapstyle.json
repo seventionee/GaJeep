@@ -3,7 +3,7 @@
     "featureType": "landscape",
     "stylers": [
       {
-        "visibility": "on"
+        "visibility": "off"
       }
     ]
   },
@@ -17,6 +17,30 @@
     ]
   },
   {
+    "featureType": "landscape.man_made",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "landscape.natural",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "landscape.natural.terrain",
+    "stylers": [
+      {
+        "visibility": "on"
+      }
+    ]
+  },
+  {
     "featureType": "poi",
     "stylers": [
       {
@@ -38,16 +62,7 @@
     "elementType": "labels.icon",
     "stylers": [
       {
-        "color": "#86246a"
-      }
-    ]
-  },
-  {
-    "featureType": "poi",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#86246a"
+        "color": "#000000"
       }
     ]
   },
@@ -82,15 +97,6 @@
     "stylers": [
       {
         "visibility": "on"
-      }
-    ]
-  },
-  {
-    "featureType": "poi.business",
-    "elementType": "labels.icon",
-    "stylers": [
-      {
-        "color": "#000000"
       }
     ]
   },

@@ -92,25 +92,46 @@ class _Mapsinterface extends State<Mapsinterface> {
                 //GOOGLE MAP END
                 //MENU START
                 Positioned(
-                  top: 30,
-                  left: 16,
-                  child: FloatingActionButton(
-                    heroTag: null,
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    onPressed: () {
-                      // Add your action here
-                    },
-                    tooltip: 'Options',
-                    child: const Icon(Icons.menu),
-                  ),
-                ),
+                    top: 30,
+                    left: 16,
+                    child: Container(
+                      //style for menu button
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.black, // set the border color
+                          width: 1.0, // set the border width
+                        ),
+                        borderRadius: BorderRadius.circular(
+                            25.0), // set the border radius
+                      ),
+                      child: FloatingActionButton.extended(
+                        heroTag: null,
+                        label: const Text(
+                          'Menu',
+                          style: TextStyle(
+                            fontFamily: 'Epilogue', //font style
+                            fontWeight: FontWeight.w400,
+                            fontSize: 20.0,
+                            color: Colors.black,
+                          ),
+                        ),
+                        foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        onPressed: () {
+                          // Add your action here
+                        },
+                        tooltip: 'Options',
+                        icon: const Icon(Icons.menu),
+                      ),
+                    )),
                 //MENU END
                 Positioned(
                   bottom: 16,
                   left: 16,
-                  child: FloatingActionButton(
+                  child: FloatingActionButton.small(
                     heroTag: null,
-                    backgroundColor: Theme.of(context).colorScheme.secondary,
+                    foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+                    backgroundColor: Theme.of(context).colorScheme.primary,
                     onPressed: _showUserLocation,
                     tooltip: 'Show user location',
                     child: const Icon(Icons.location_searching),
