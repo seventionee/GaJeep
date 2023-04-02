@@ -71,6 +71,7 @@ class _Mapsinterface extends State<Mapsinterface> {
           home: Scaffold(
             body: Stack(
               children: [
+                //GOOGLEMAP START
                 GoogleMap(
                   onMapCreated: (GoogleMapController controller) async {
                     _controller = controller;
@@ -88,10 +89,27 @@ class _Mapsinterface extends State<Mapsinterface> {
                   myLocationButtonEnabled: false, // Remove location button
                   mapToolbarEnabled: false,
                 ),
+                //GOOGLE MAP END
+                //MENU START
+                Positioned(
+                  top: 30,
+                  left: 16,
+                  child: FloatingActionButton(
+                    heroTag: null,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    onPressed: () {
+                      // Add your action here
+                    },
+                    tooltip: 'Options',
+                    child: const Icon(Icons.menu),
+                  ),
+                ),
+                //MENU END
                 Positioned(
                   bottom: 16,
                   left: 16,
                   child: FloatingActionButton(
+                    heroTag: null,
                     backgroundColor: Theme.of(context).colorScheme.secondary,
                     onPressed: _showUserLocation,
                     tooltip: 'Show user location',
