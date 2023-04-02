@@ -6,43 +6,70 @@ void main() {
   runApp(const MyApp());
 }
 
-// STATELESS WIDGET
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  // This widget is the root of your application.
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Landing Page',
-        theme: ThemeData(
-          //color palette
-          colorScheme: ColorScheme.fromSwatch().copyWith(
-            primary: const Color(0xFFF8BB28), //main color - ignore first two Fs
-            secondary: const Color(0xFFFA7F81), //secondary color
-            tertiary: const Color(0xFF86246A), //tertiary color from jeep icon
-          ),
+      title: 'Landing Page',
+      theme: ThemeData(
+        //color palette
+        colorScheme: ColorScheme.fromSwatch().copyWith(
+          primary: const Color(0xFFF8BB28), //main color - ignore first two Fs
+          secondary: const Color(0xFFFA7F81), //secondary color
+          tertiary: const Color(0xFF86246A), //tertiary color from jeep icon
         ),
-        home: const MyHomePage(title: 'GaJeep Color Scheme'),
-        routes: {
-          LearnMorePage.routeName: (context) => const LearnMorePage(),
-          Mapsinterface.routeName: (context) => Mapsinterface(),
-        });
+      ),
+      home: const SplashScreen(), // set SplashScreen as the initial screen
+      routes: {
+        LearnMorePage.routeName: (context) => const LearnMorePage(),
+        Mapsinterface.routeName: (context) => Mapsinterface(),
+      },
+    );
+  }
+}
+
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({Key? key}) : super(key: key);
+
+  @override
+  createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Simulate a delay before navigating to the home screen
+    Future.delayed(const Duration(seconds: 2), () {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+            builder: (context) =>
+                const MyHomePage(title: 'GaJeep Color Scheme')),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        body: Center(
+      child: Hero(
+        tag: 'logosplash',
+        child: Image.asset(
+          'asset/logo/gajeep_logo1.png',
+          fit: BoxFit.cover,
+          width: 250,
+          height: 250,
+        ),
+      ),
+    ));
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
+  const MyHomePage({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
@@ -51,19 +78,20 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  //welcome page
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Image.asset(
-          'asset/logo/gajeep_logo1.png',
-          fit: BoxFit.cover,
-          width: 250,
-          height: 250,
+        Hero(
+          tag: 'logosplash',
+          child: Image.asset(
+            'asset/logo/gajeep_logo1.png',
+            fit: BoxFit.cover,
+            width: 250,
+            height: 250,
+          ),
         ),
-        const SizedBox(height: 30.0),
         Container(
           decoration: BoxDecoration(
             border: Border.all(
