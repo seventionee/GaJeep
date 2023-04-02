@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'learnmore.dart';
 import 'mapsinterface.dart';
+import 'package:flutter/scheduler.dart' show timeDilation;
 
 //STARTING THE FLUTTER APP
 void main() {
@@ -84,6 +85,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
+    timeDilation = 1.5;
     return Scaffold(
       body: Center(
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
