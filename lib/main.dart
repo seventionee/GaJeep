@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'learnmore.dart';
 import 'mapsinterface.dart';
+import 'package:flutter/scheduler.dart' show timeDilation;
 
+//STARTING THE FLUTTER APP
 void main() {
   runApp(const MyApp());
 }
@@ -37,6 +39,7 @@ class SplashScreen extends StatefulWidget {
   createState() => _SplashScreenState();
 }
 
+//SPLASHSCREEN CLASS
 class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
@@ -51,12 +54,14 @@ class _SplashScreenState extends State<SplashScreen> {
     });
   }
 
+  //SPLASHSCREEN
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         body: Center(
       child: Hero(
-        tag: 'logosplash',
+        tag: const Text('welcomelogo'),
         child: Image.asset(
           'asset/logo/gajeep_logo1.png',
           fit: BoxFit.cover,
@@ -80,11 +85,12 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
+    timeDilation = 1.5;
     return Scaffold(
       body: Center(
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
         Hero(
-          tag: 'logosplash',
+          tag: const Text('welcomelogo'),
           child: Image.asset(
             'asset/logo/gajeep_logo1.png',
             fit: BoxFit.cover,
