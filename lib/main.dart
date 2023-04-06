@@ -4,6 +4,7 @@ import 'mapsinterface.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter/services.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'component/constants.dart';
 
 //STARTING THE FLUTTER APP
 void main() {
@@ -62,13 +63,46 @@ class _SplashScreenState extends State<SplashScreen> {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: const Text('No Internet Connection'),
+              title: const Text(
+                'No Internet Connection',
+                style: TextStyle(
+                  fontFamily: 'Epilogue', //font style
+                  fontWeight: FontWeight.w400,
+                  fontSize: 20.0,
+                  color: Colors.black,
+                ),
+              ),
               content: const Text(
-                  'Please check your internet connection and try again.'),
+                'Please check your internet connection and try again.',
+                style: TextStyle(
+                  fontFamily: 'Epilogue', //font style
+                  fontWeight: FontWeight.w400,
+                  fontSize: 15.0,
+                  color: Colors.black,
+                ),
+              ),
               actions: [
                 TextButton(
                   onPressed: () => SystemNavigator.pop(),
-                  child: const Text('OK'),
+                  style: ButtonStyle(
+                    backgroundColor:
+                        MaterialStateProperty.all<Color>(primaryColor),
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18.0),
+                        side: const BorderSide(color: Colors.black),
+                      ),
+                    ),
+                  ),
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(
+                      fontFamily: 'Epilogue', //font style
+                      fontWeight: FontWeight.w400,
+                      fontSize: 20.0,
+                      color: Colors.black,
+                    ),
+                  ),
                 ),
               ],
             );
