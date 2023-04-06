@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'learnmore.dart';
 import 'mapsinterface.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
+import 'package:flutter/services.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'component/constants.dart';
 
 //STARTING THE FLUTTER APP
 void main() {
@@ -41,17 +44,81 @@ class SplashScreen extends StatefulWidget {
 
 //SPLASHSCREEN CLASS
 class _SplashScreenState extends State<SplashScreen> {
+  final Connectivity _connectivity = Connectivity();
   @override
   void initState() {
     super.initState();
+    checkConnectivity();
+
     // Simulate a delay before navigating to the home screen
-    Future.delayed(const Duration(seconds: 2), () {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-            builder: (context) =>
-                const MyHomePage(title: 'GaJeep Color Scheme')),
-      );
-    });
+  }
+
+  Future<void> checkConnectivity() async {
+    ConnectivityResult connectivityResult =
+        await _connectivity.checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      // User is not connected to the internet, show error message
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text(
+                'No Internet Connection',
+                style: TextStyle(
+                  fontFamily: 'Epilogue', //font style
+                  fontWeight: FontWeight.w400,
+                  fontSize: 20.0,
+                  color: Colors.black,
+                ),
+              ),
+              content: const Text(
+                'Please check your internet connection and try again.',
+                style: TextStyle(
+                  fontFamily: 'Epilogue', //font style
+                  fontWeight: FontWeight.w400,
+                  fontSize: 15.0,
+                  color: Colors.black,
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => SystemNavigator.pop(),
+                  style: ButtonStyle(
+                    backgroundColor:
+                        MaterialStateProperty.all<Color>(primaryColor),
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18.0),
+                        side: const BorderSide(color: Colors.black),
+                      ),
+                    ),
+                  ),
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(
+                      fontFamily: 'Epilogue', //font style
+                      fontWeight: FontWeight.w400,
+                      fontSize: 20.0,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    } else {
+      // User is connected to the internet, proceed with splash screen
+      Future.delayed(const Duration(seconds: 2), () {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+              builder: (context) =>
+                  const MyHomePage(title: 'GaJeep Color Scheme')),
+        );
+      });
+    }
   }
 
   //SPLASHSCREEN
