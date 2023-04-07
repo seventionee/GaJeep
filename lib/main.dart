@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+
 import 'learnmore.dart';
 import 'mapsinterface.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter/services.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'component/constants.dart';
+import 'searchscreen.dart';
 
 //STARTING THE FLUTTER APP
 void main() {
@@ -30,6 +32,7 @@ class MyApp extends StatelessWidget {
       routes: {
         LearnMorePage.routeName: (context) => const LearnMorePage(),
         Mapsinterface.routeName: (context) => const Mapsinterface(),
+        Searchscreen.routeName: (context) => const Searchscreen(),
       },
     );
   }
