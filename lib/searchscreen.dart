@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app_1/mapsinterface.dart';
 import 'package:google_maps_webservice/places.dart';
-import 'package:google_maps_webservice/geocoding.dart';
+
 import 'component/location_list_tile.dart';
 import 'component/constants.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -117,8 +117,10 @@ class _SearchscreenState extends State<Searchscreen> {
                       LatLng placelocation = LatLng(latitude, longitude);
                       // Pass the geolocation data back to the previous screen
                       debugPrint('LatLng: $placelocation');
-                      Navigator.of(context).pushNamed(Mapsinterface.routeName,
-                          arguments: {placelocation});
+                      setState(() {
+                        Navigator.of(context).pushNamed(Mapsinterface.routeName,
+                            arguments: {placelocation});
+                      });
                     },
                     location: place.name,
                   );

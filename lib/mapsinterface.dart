@@ -17,11 +17,15 @@ class Mapsinterface extends StatefulWidget {
 
 class _Mapsinterface extends State<Mapsinterface> {
   late GoogleMapController _controller;
+  LatLng _initialcameralocation =
+      const LatLng(10.318248454545204, 123.90379260190599);
 
+  //getting Json file for google maps style
   Future<String> getJsonFile(String path) async {
     return await rootBundle.loadString(path);
   }
 
+  //asking user for location permission
   @override
   void initState() {
     super.initState();
@@ -64,6 +68,22 @@ class _Mapsinterface extends State<Mapsinterface> {
 
   @override
   Widget build(BuildContext context) {
+    bool placelocationupdate = false;
+    final arguments = ModalRoute.of(context)!.settings.arguments;
+    if (arguments != null) {
+      final location = arguments;
+      debugPrint('location check $arguments');
+      if (location is LatLng) {
+        setState(() {
+          _initialcameralocation = location;
+
+          placelocationupdate = true;
+          debugPrint('location check $arguments');
+          debugPrint('initial $_initialcameralocation');
+        });
+      }
+    }
+
     return FutureBuilder(
       future: getJsonFile('asset/mapstyle.json'),
       builder: (context, snapshot) {
@@ -225,10 +245,16 @@ class _Mapsinterface extends State<Mapsinterface> {
                       minMaxZoomPreference: const MinMaxZoomPreference(17, 19),
                       mapType: MapType.normal,
                       myLocationEnabled: true,
-                      initialCameraPosition: const CameraPosition(
-                        target: LatLng(10.3156173, 123.882969),
-                        zoom: 19,
-                      ),
+                      initialCameraPosition: placelocationupdate
+                          ? const CameraPosition(
+                              target: LatLng(
+                                  10.294722785126801, 123.88054399084835),
+                              zoom: 19,
+                            )
+                          : CameraPosition(
+                              target: _initialcameralocation,
+                              zoom: 19,
+                            ),
                       zoomControlsEnabled: false, // Remove zoom controls
                       myLocationButtonEnabled: false, // Remove location button
                       mapToolbarEnabled: false,

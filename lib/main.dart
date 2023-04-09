@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Landing Page',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         //color palette
         colorScheme: ColorScheme.fromSwatch().copyWith(
@@ -45,13 +45,13 @@ class SplashScreen extends StatefulWidget {
   createState() => _SplashScreenState();
 }
 
-//SPLASHSCREEN CLASS
+//splash screen
 class _SplashScreenState extends State<SplashScreen> {
   final Connectivity _connectivity = Connectivity();
   @override
   void initState() {
     super.initState();
-    checkConnectivity();
+    checkConnectivity(); //check user connectivity to internet
 
     // Simulate a delay before navigating to the home screen
   }
@@ -86,7 +86,8 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
               actions: [
                 TextButton(
-                  onPressed: () => SystemNavigator.pop(),
+                  onPressed: () =>
+                      SystemNavigator.pop(), //exit the app after user taps OK
                   style: ButtonStyle(
                     backgroundColor:
                         MaterialStateProperty.all<Color>(primaryColor),
@@ -113,7 +114,7 @@ class _SplashScreenState extends State<SplashScreen> {
         );
       }
     } else {
-      // User is connected to the internet, proceed with splash screen
+      //If User is connected to the internet, proceed with splash screen
       Future.delayed(const Duration(seconds: 2), () {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
@@ -124,7 +125,7 @@ class _SplashScreenState extends State<SplashScreen> {
     }
   }
 
-  //SPLASHSCREEN
+  //SPLASHSCREEN design
 
   @override
   Widget build(BuildContext context) {
@@ -192,7 +193,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: const Text(
               'Get Started',
               style: TextStyle(
-                fontFamily: 'Epilogue', // set the font family to "Raleway"
+                fontFamily: 'Epilogue',
                 fontWeight: FontWeight.w400,
                 fontSize: 20.0,
                 color: Colors.black,
