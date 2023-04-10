@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_app_1/learnmore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:search_map_place_updated/search_map_place_updated.dart';
 import 'component/constants.dart';
-import 'searchscreen.dart';
+import 'learnmore.dart';
 
+// ignore: use_key_in_widget_constructors
 class Mapsinterface extends StatefulWidget {
   static const routeName = '/mapsinterface';
   const Mapsinterface({Key? key}) : super(key: key);
@@ -17,15 +18,11 @@ class Mapsinterface extends StatefulWidget {
 
 class _Mapsinterface extends State<Mapsinterface> {
   late GoogleMapController _controller;
-  LatLng _initialcameralocation =
-      const LatLng(10.318248454545204, 123.90379260190599);
 
-  //getting Json file for google maps style
   Future<String> getJsonFile(String path) async {
     return await rootBundle.loadString(path);
   }
 
-  //asking user for location permission
   @override
   void initState() {
     super.initState();
@@ -61,181 +58,134 @@ class _Mapsinterface extends State<Mapsinterface> {
     final Position position = await Geolocator.getCurrentPosition();
     final CameraPosition userPosition = CameraPosition(
       target: LatLng(position.latitude, position.longitude),
-      zoom: 19,
+      zoom: 17,
     );
     _controller.animateCamera(CameraUpdate.newCameraPosition(userPosition));
   }
 
   @override
   Widget build(BuildContext context) {
-    bool placelocationupdate = false;
-    final arguments = ModalRoute.of(context)!.settings.arguments;
-    if (arguments != null) {
-      final location = arguments;
-      debugPrint('location check $arguments');
-      if (location is LatLng) {
-        setState(() {
-          _initialcameralocation = location;
-
-          placelocationupdate = true;
-          debugPrint('location check $arguments');
-          debugPrint('initial $_initialcameralocation');
-        });
-      }
-    }
-
-    return FutureBuilder(
-      future: getJsonFile('asset/mapstyle.json'),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return Container();
-        }
-        return MaterialApp(
-          home: Scaffold(
-            drawer: Drawer(
-              child: ListView(
-                padding: EdgeInsets.zero,
-                //MENU
-                children: <Widget>[
-                  const DrawerHeader(
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image:
-                              AssetImage('asset/drawerheadernobackground.png'),
-                          fit: BoxFit.cover,
+    return WillPopScope(
+      onWillPop: _onBackPressed,
+      child: FutureBuilder(
+        future: getJsonFile('asset/mapstyle.json'),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return Container();
+          }
+          return MaterialApp(
+            home: Scaffold(
+              drawer: Drawer(
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  //MENU
+                  children: <Widget>[
+                    const DrawerHeader(
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: AssetImage(
+                                'asset/drawerheadernobackground.png'),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        child: null),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: const Color.fromARGB(255, 0, 0, 0),
+                            width: 1.0,
+                          ),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(25.0)),
+                          color: primaryColor,
+                        ),
+                        child: ListTile(
+                          title: const Text(
+                            'Route Directory',
+                            style: TextStyle(
+                                fontFamily: 'Epilogue', //font style
+                                fontWeight: FontWeight.w400,
+                                fontSize: 20.0,
+                                color: Colors.black),
+                          ),
+                          tileColor: backgroundColor,
+                          leading: const Icon(
+                              Icons.directions_transit_filled_sharp,
+                              color: Colors.black),
+                          onTap: () {
+                            // Add your action here
+                          },
                         ),
                       ),
-                      child: null),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: const Color.fromARGB(255, 0, 0, 0),
-                          width: 1.0,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: const Color.fromARGB(255, 0, 0, 0),
+                            width: 1.0,
+                          ),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(25.0)),
+                          color: primaryColor,
                         ),
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(25.0)),
-                        color: primaryColor,
-                      ),
-                      child: ListTile(
-                        title: const Text(
-                          'Search Place',
-                          style: TextStyle(
+                        child: ListTile(
+                          title: const Text(
+                            'Fare Calculator',
+                            style: TextStyle(
                               fontFamily: 'Epilogue', //font style
                               fontWeight: FontWeight.w400,
                               fontSize: 20.0,
+                              color: Colors.black,
+                            ),
+                          ),
+                          leading: const Icon(Icons.calculate_rounded,
                               color: Colors.black),
+                          onTap: () {},
                         ),
-                        tileColor: backgroundColor,
-                        leading: const Icon(Icons.place, color: Colors.black),
-                        onTap: () {
-                          Navigator.of(context).pushNamed(
-                            Searchscreen.routeName,
-                          );
-                        },
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: const Color.fromARGB(255, 0, 0, 0),
-                          width: 1.0,
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: const Color.fromARGB(255, 0, 0, 0),
+                            width: 1.0,
+                          ),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(25.0)),
+                          color: primaryColor,
                         ),
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(25.0)),
-                        color: primaryColor,
-                      ),
-                      child: ListTile(
-                        title: const Text(
-                          'Route Directory',
-                          style: TextStyle(
+                        child: ListTile(
+                          title: const Text(
+                            'About GaJeep',
+                            style: TextStyle(
                               fontFamily: 'Epilogue', //font style
                               fontWeight: FontWeight.w400,
                               fontSize: 20.0,
+                              color: Colors.black,
+                            ),
+                          ),
+                          leading: const Icon(Icons.info_outline_rounded,
                               color: Colors.black),
+                          onTap: () {
+                            Navigator.of(context).pushNamed(
+                              LearnMorePage.routeName,
+                            );
+                          },
                         ),
-                        tileColor: backgroundColor,
-                        leading: const Icon(
-                            Icons.directions_transit_filled_sharp,
-                            color: Colors.black),
-                        onTap: () {
-                          // Add your action here
-                        },
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: const Color.fromARGB(255, 0, 0, 0),
-                          width: 1.0,
-                        ),
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(25.0)),
-                        color: primaryColor,
-                      ),
-                      child: ListTile(
-                        title: const Text(
-                          'Fare Calculator',
-                          style: TextStyle(
-                            fontFamily: 'Epilogue', //font style
-                            fontWeight: FontWeight.w400,
-                            fontSize: 20.0,
-                            color: Colors.black,
-                          ),
-                        ),
-                        leading: const Icon(Icons.calculate_rounded,
-                            color: Colors.black),
-                        onTap: () {},
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: const Color.fromARGB(255, 0, 0, 0),
-                          width: 1.0,
-                        ),
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(25.0)),
-                        color: primaryColor,
-                      ),
-                      child: ListTile(
-                        title: const Text(
-                          'About GaJeep',
-                          style: TextStyle(
-                            fontFamily: 'Epilogue', //font style
-                            fontWeight: FontWeight.w400,
-                            fontSize: 20.0,
-                            color: Colors.black,
-                          ),
-                        ),
-                        leading: const Icon(Icons.info_outline_rounded,
-                            color: Colors.black),
-                        onTap: () {
-                          Navigator.of(context).pushNamed(
-                            LearnMorePage.routeName,
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            body: Builder(
-              builder: (context) {
+              body: Builder(builder: (context) {
                 return Stack(
                   children: [
-                    //GOOGLEMAP START
                     GoogleMap(
                       onMapCreated: (GoogleMapController controller) async {
                         _controller = controller;
@@ -245,23 +195,33 @@ class _Mapsinterface extends State<Mapsinterface> {
                       minMaxZoomPreference: const MinMaxZoomPreference(17, 19),
                       mapType: MapType.normal,
                       myLocationEnabled: true,
-                      initialCameraPosition: placelocationupdate
-                          ? const CameraPosition(
-                              target: LatLng(
-                                  10.294722785126801, 123.88054399084835),
-                              zoom: 19,
-                            )
-                          : CameraPosition(
-                              target: _initialcameralocation,
-                              zoom: 19,
-                            ),
+                      initialCameraPosition: const CameraPosition(
+                        target: LatLng(10.3156173, 123.882969),
+                        zoom: 17,
+                      ),
                       zoomControlsEnabled: false, // Remove zoom controls
                       myLocationButtonEnabled: false, // Remove location button
                       mapToolbarEnabled: false,
                     ),
-                    //GOOGLE MAP END
-
-                    //MENU START
+                    Positioned(
+                      top: 50,
+                      left: 16,
+                      right: 16,
+                      child: SearchMapPlaceWidget(
+                        apiKey: 'AIzaSyBOS4cS8wIYV2tRBhtf5O2hnIZ1Iley9Jc',
+                        language: 'en',
+                        bgColor: Colors.white,
+                        iconColor: Theme.of(context).colorScheme.primary,
+                        textColor: Colors.black,
+                        placeholder: 'Where do you want to go to?',
+                        onSelected: (Place place) async {
+                          final geolocation = await place.geolocation;
+                          final cameraUpdate =
+                              CameraUpdate.newLatLng(geolocation!.coordinates!);
+                          _controller.animateCamera(cameraUpdate);
+                        },
+                      ),
+                    ),
                     Positioned(
                         top: 30,
                         left: 16,
@@ -294,9 +254,6 @@ class _Mapsinterface extends State<Mapsinterface> {
                             icon: const Icon(Icons.menu),
                           ),
                         )),
-                    //MENU END
-
-                    //Show user location button START
                     Positioned(
                         bottom: 16,
                         right: 16,
@@ -319,11 +276,77 @@ class _Mapsinterface extends State<Mapsinterface> {
                         )),
                   ],
                 );
-              },
+              }),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Future<bool> _onBackPressed() async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            'Exit',
+            style: TextStyle(
+              fontFamily: 'Epilogue', //font style
+              fontWeight: FontWeight.w400,
+              fontSize: 20.0,
+              color: Colors.black,
             ),
           ),
+          content: const Text(
+            'Are you sure you want to exit?',
+            style: TextStyle(
+              fontFamily: 'Epilogue', //font style
+              fontWeight: FontWeight.w400,
+              fontSize: 20.0,
+              color: Colors.black,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all<Color>(primaryColor),
+                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18.0),
+                    side: const BorderSide(color: Colors.black),
+                  ),
+                ),
+              ),
+              child: const Text(
+                'No',
+                style: TextStyle(
+                  fontFamily: 'Epilogue', //font style
+                  fontWeight: FontWeight.w400,
+                  fontSize: 20.0,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                SystemNavigator.pop();
+              },
+              child: const Text(
+                'Yes',
+                style: TextStyle(
+                  fontFamily: 'Epilogue', //font style
+                  fontWeight: FontWeight.w400,
+                  fontSize: 20.0,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+          ],
         );
       },
     );
+    return false;
   }
 }
