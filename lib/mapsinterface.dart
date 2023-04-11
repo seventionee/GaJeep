@@ -241,7 +241,7 @@ class _Mapsinterface extends State<Mapsinterface> {
                           child: FloatingActionButton(
                             heroTag: null,
                             foregroundColor: const Color.fromARGB(255, 0, 0, 0),
-                            backgroundColor: primaryColor,
+                            backgroundColor: secondaryColor,
                             onPressed: _showUserLocation,
                             child: const Icon(Icons.location_searching),
                           ),
@@ -254,7 +254,7 @@ class _Mapsinterface extends State<Mapsinterface> {
                         apiKey: 'AIzaSyBOS4cS8wIYV2tRBhtf5O2hnIZ1Iley9Jc',
                         language: 'en',
                         bgColor: Colors.white,
-                        iconColor: primaryColor,
+                        iconColor: secondaryColor,
                         textColor: Colors.black,
                         placeholder: 'Where do you want to go to?',
                         onSelected: (Place place) async {
