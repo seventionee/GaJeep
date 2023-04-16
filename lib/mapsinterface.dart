@@ -18,7 +18,8 @@ class Mapsinterface extends StatefulWidget {
 
 class _Mapsinterface extends State<Mapsinterface> {
   late GoogleMapController _controller;
-
+  LatLng _userLocation = const LatLng(10.298333, 123.893366);
+  StreamSubscription<Position>? _positionStreamSubscription;
   Future<String> getJsonFile(String path) async {
     return await rootBundle.loadString(path);
   }
@@ -27,13 +28,14 @@ class _Mapsinterface extends State<Mapsinterface> {
   void initState() {
     super.initState();
     _requestLocationPermission();
+    _subscribeUserLocationUpdates();
   }
 
   Future<void> _requestLocationPermission() async {
     await Permission.location.request();
   }
 
-  void _showUserLocation() async {
+  void _subscribeUserLocationUpdates() async {
     bool serviceEnabled;
     LocationPermission permission;
 
@@ -55,12 +57,23 @@ class _Mapsinterface extends State<Mapsinterface> {
       }
     }
 
-    final Position position = await Geolocator.getCurrentPosition();
-    final CameraPosition userPosition = CameraPosition(
-      target: LatLng(position.latitude, position.longitude),
-      zoom: 17,
-    );
-    _controller.animateCamera(CameraUpdate.newCameraPosition(userPosition));
+    _positionStreamSubscription = Geolocator.getPositionStream(
+        locationSettings: const LocationSettings(
+      accuracy: LocationAccuracy.best,
+      distanceFilter: 5,
+    )).listen((Position position) {
+      setState(() {
+        _userLocation = LatLng(position.latitude, position.longitude);
+      });
+      _controller.animateCamera(CameraUpdate.newCameraPosition(
+          CameraPosition(target: _userLocation, zoom: 17)));
+    });
+  }
+
+  @override
+  void dispose() {
+    _positionStreamSubscription?.cancel(); // Add this line
+    super.dispose();
   }
 
   @override
@@ -242,7 +255,9 @@ class _Mapsinterface extends State<Mapsinterface> {
                             heroTag: null,
                             foregroundColor: const Color.fromARGB(255, 0, 0, 0),
                             backgroundColor: secondaryColor,
-                            onPressed: _showUserLocation,
+                            onPressed: () => _controller.animateCamera(
+                                CameraUpdate.newCameraPosition(CameraPosition(
+                                    target: _userLocation, zoom: 17))),
                             child: const Icon(Icons.location_searching),
                           ),
                         )),
