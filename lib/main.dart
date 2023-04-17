@@ -135,17 +135,25 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Center(
-      child: Hero(
-        tag: const Text('welcomelogo'),
-        child: Image.asset(
-          'asset/logo/gajeep_logo1.png',
-          fit: BoxFit.cover,
-          width: 250,
-          height: 250,
+      body: Container(
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'asset/logo/gajeep_logo1.png',
+              fit: BoxFit.cover,
+              width: 250,
+              height: 250,
+            ),
+            const SizedBox(height: 16),
+            const CircularProgressIndicator(
+              color: primaryColor,
+            ),
+          ],
         ),
       ),
-    ));
+    );
   }
 }
 
@@ -158,6 +166,52 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
+class SplashScreenWithCallback extends StatefulWidget {
+  const SplashScreenWithCallback({Key? key, required this.onComplete})
+      : super(key: key);
+
+  final Function onComplete;
+
+  @override
+  createState() => _SplashScreenWithCallbackState();
+}
+
+class _SplashScreenWithCallbackState extends State<SplashScreenWithCallback> {
+  @override
+  void initState() {
+    super.initState();
+
+    // Call the onComplete callback after a delay
+    Future.delayed(const Duration(seconds: 2), () {
+      widget.onComplete();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'asset/logo/gajeep_logo1.png',
+              fit: BoxFit.cover,
+              width: 250,
+              height: 250,
+            ),
+            const SizedBox(height: 16),
+            const CircularProgressIndicator(
+              color: primaryColor,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
@@ -165,14 +219,11 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       body: Center(
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Hero(
-          tag: const Text('welcomelogo'),
-          child: Image.asset(
-            'asset/logo/gajeep_logo1.png',
-            fit: BoxFit.cover,
-            width: 250,
-            height: 250,
-          ),
+        Image.asset(
+          'asset/logo/gajeep_logo1.png',
+          fit: BoxFit.cover,
+          width: 250,
+          height: 250,
         ),
         Container(
           decoration: BoxDecoration(
@@ -184,8 +235,18 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           child: ElevatedButton(
             onPressed: () {
-              Navigator.of(context).pushNamed(
-                Mapsinterface.routeName,
+              // Show the splash screen before navigating
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (BuildContext context) => SplashScreenWithCallback(
+                  onComplete: () {
+                    Navigator.pop(context); // Close the splash screen dialog
+                    Navigator.of(context).pushNamed(
+                      Mapsinterface.routeName,
+                    );
+                  },
+                ),
               );
             },
             style: ElevatedButton.styleFrom(
