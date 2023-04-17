@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'component/constants.dart';
 import 'searchscreen.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 //STARTING THE FLUTTER APP
 void main() {
@@ -52,8 +53,12 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     checkConnectivity(); //check user connectivity to internet
-
+    _requestLocationPermission();
     // Simulate a delay before navigating to the home screen
+  }
+
+  Future<void> _requestLocationPermission() async {
+    await Permission.location.request();
   }
 
   Future<void> checkConnectivity() async {
