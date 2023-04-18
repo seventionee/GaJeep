@@ -272,7 +272,7 @@ class _Mapsinterface extends State<Mapsinterface> {
                         location: _userLocation,
                         radius: 14697,
                         strictBounds: true,
-                        iconColor: secondaryColor,
+                        iconColor: Colors.black,
                         textColor: Colors.black,
                         placeholder: 'Where do you want to go to?',
                         onSelected: (Place place) async {
