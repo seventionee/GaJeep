@@ -8,6 +8,8 @@ import 'package:search_map_place_updated/search_map_place_updated.dart';
 import 'component/constants.dart';
 import 'learnmore.dart';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 // ignore: use_key_in_widget_constructors
 class Mapsinterface extends StatefulWidget {
   static const routeName = '/mapsinterface';
@@ -18,6 +20,8 @@ class Mapsinterface extends StatefulWidget {
 
 class _Mapsinterface extends State<Mapsinterface> {
   late GoogleMapController _controller;
+  Set<Polyline> _polylines = {};
+
   LatLng _userLocation = const LatLng(10.298333, 123.893366);
   StreamSubscription<Position>? _positionStreamSubscription;
   Future<String> getJsonFile(String path) async {
@@ -29,6 +33,39 @@ class _Mapsinterface extends State<Mapsinterface> {
     super.initState();
     _requestLocationPermission();
     _subscribeUserLocationUpdates();
+    getPolylinesFromFirestore().then((polylines) {
+      setState(() {
+        _polylines = polylines.toSet();
+      });
+    });
+  }
+
+  Future<List<Polyline>> getPolylinesFromFirestore() async {
+    List<Polyline> polylines = [];
+    int polylineIdCounter = 1;
+
+    CollectionReference collection =
+        FirebaseFirestore.instance.collection('Routes');
+    QuerySnapshot querySnapshot = await collection.get();
+
+    for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+      List<GeoPoint> geoPoints = List.from(doc['Route Points']);
+      List<LatLng> latLngPoints = geoPoints
+          .map((point) => LatLng(point.latitude, point.longitude))
+          .toList();
+      debugPrint('Polyline fetch check $latLngPoints');
+      Polyline polyline = Polyline(
+        polylineId: PolylineId(polylineIdCounter.toString()),
+        points: latLngPoints,
+        color: Colors.blue,
+        width: 3,
+      );
+
+      polylines.add(polyline);
+      polylineIdCounter++;
+    }
+
+    return polylines;
   }
 
   Future<void> _requestLocationPermission() async {
@@ -215,6 +252,7 @@ class _Mapsinterface extends State<Mapsinterface> {
                       zoomControlsEnabled: false, // Remove zoom controls
                       myLocationButtonEnabled: false, // Remove location button
                       mapToolbarEnabled: false,
+                      polylines: _polylines,
                     ),
                     Positioned(
                         bottom: 90,
