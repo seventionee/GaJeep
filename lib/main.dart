@@ -9,13 +9,27 @@ import 'component/constants.dart';
 import 'searchscreen.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import 'package:firebase_core/firebase_core.dart';
+
 //STARTING THE FLUTTER APP
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: const FirebaseOptions(
+      apiKey: 'AIzaSyBVnkaLr9-BnWw_JFJkELPlW6Rn8EaemFk',
+      appId: '1:138811229758:android:7f59f6d22112ca29ae336f',
+      messagingSenderId: '138811229758',
+      projectId: 'gajeep-c5101',
+      databaseURL:
+          'https://gajeep-c5101-default-rtdb.asia-southeast1.firebasedatabase.app/',
+    ),
+  );
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  MyApp({Key? key}) : super(key: key);
+  final Future<FirebaseApp> _fApp = Firebase.initializeApp();
 
   @override
   Widget build(BuildContext context) {

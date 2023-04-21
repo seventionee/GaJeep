@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "138811229758",
+    "firebase_url": "https://gajeep-c5101-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "gajeep-c5101",
+    "storage_bucket": "gajeep-c5101.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:138811229758:android:7f59f6d22112ca29ae336f",
+        "android_client_info": {
+          "package_name": "com.example.flutter_app_1"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "138811229758-fesiu1nnlh9ss37gkkbcavnrile6og1t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBVnkaLr9-BnWw_JFJkELPlW6Rn8EaemFk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "138811229758-fesiu1nnlh9ss37gkkbcavnrile6og1t.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
