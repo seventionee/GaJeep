@@ -343,8 +343,8 @@ class _Mapsinterface extends State<Mapsinterface> {
                             backgroundColor: secondaryColor,
                             onPressed: _toggleroutesvisibility,
                             child: Icon(_isrouteshown
-                                ? Icons.visibility
-                                : Icons.visibility_off),
+                                ? Icons.directions
+                                : Icons.directions_off),
                           ),
                         )),
                     Positioned(
