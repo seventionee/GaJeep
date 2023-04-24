@@ -6,7 +6,7 @@ import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter/services.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'component/constants.dart';
-import 'searchscreen.dart';
+
 import 'package:permission_handler/permission_handler.dart';
 
 import 'package:firebase_core/firebase_core.dart';
@@ -47,7 +47,6 @@ class MyApp extends StatelessWidget {
       routes: {
         LearnMorePage.routeName: (context) => const LearnMorePage(),
         Mapsinterface.routeName: (context) => const Mapsinterface(),
-        Searchscreen.routeName: (context) => const Searchscreen(),
       },
     );
   }

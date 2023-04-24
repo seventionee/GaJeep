@@ -7,6 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:search_map_place_updated/search_map_place_updated.dart';
 import 'component/constants.dart';
 import 'learnmore.dart';
+import 'dart:ui' as ui;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -21,6 +22,7 @@ class Mapsinterface extends StatefulWidget {
 class _Mapsinterface extends State<Mapsinterface> {
   late GoogleMapController _controller;
   Set<Polyline> _polylines = {};
+  bool _isrouteshown = true;
 
   LatLng _userLocation = const LatLng(10.298333, 123.893366);
   StreamSubscription<Position>? _positionStreamSubscription;
@@ -40,6 +42,12 @@ class _Mapsinterface extends State<Mapsinterface> {
     });
   }
 
+  void _toggleroutesvisibility() {
+    setState(() {
+      _isrouteshown = !_isrouteshown;
+    });
+  }
+
   Future<List<Polyline>> getPolylinesFromFirestore() async {
     List<Polyline> polylines = [];
     int polylineIdCounter = 1;
@@ -48,18 +56,36 @@ class _Mapsinterface extends State<Mapsinterface> {
         FirebaseFirestore.instance.collection('Routes');
     QuerySnapshot querySnapshot = await collection.get();
 
+    int numPolylines = querySnapshot.docs.length;
+    double hueStep = 360 / numPolylines;
+
     for (QueryDocumentSnapshot doc in querySnapshot.docs) {
       List<GeoPoint> geoPoints = List.from(doc['Route Points']);
+      String routeNumber = (doc['Route Number']);
       List<LatLng> latLngPoints = geoPoints
           .map((point) => LatLng(point.latitude, point.longitude))
           .toList();
-      debugPrint('Polyline fetch check $latLngPoints');
-      Polyline polyline = Polyline(
-        polylineId: PolylineId(polylineIdCounter.toString()),
-        points: latLngPoints,
-        color: Colors.blue,
-        width: 3,
+      debugPrint('Polyline fetch for $routeNumber: $latLngPoints');
+
+      ui.Color polylineColor = ui.Color.fromARGB(
+        255,
+        HSVColor.fromAHSV(1.0, hueStep * (polylineIdCounter - 1), 1.0, 1.0)
+            .toColor()
+            .red,
+        HSVColor.fromAHSV(1.0, hueStep * (polylineIdCounter - 1), 1.0, 1.0)
+            .toColor()
+            .green,
+        HSVColor.fromAHSV(1.0, hueStep * (polylineIdCounter - 1), 1.0, 1.0)
+            .toColor()
+            .blue,
       );
+
+      Polyline polyline = Polyline(
+          polylineId: PolylineId(polylineIdCounter.toString()),
+          points: latLngPoints,
+          color: polylineColor,
+          width: 5,
+          onTap: () {});
 
       polylines.add(polyline);
       polylineIdCounter++;
@@ -252,7 +278,7 @@ class _Mapsinterface extends State<Mapsinterface> {
                       zoomControlsEnabled: false, // Remove zoom controls
                       myLocationButtonEnabled: false, // Remove location button
                       mapToolbarEnabled: false,
-                      polylines: _polylines,
+                      polylines: _isrouteshown ? _polylines : {},
                     ),
                     Positioned(
                         bottom: 90,
@@ -297,6 +323,28 @@ class _Mapsinterface extends State<Mapsinterface> {
                                 CameraUpdate.newCameraPosition(CameraPosition(
                                     target: _userLocation, zoom: 17))),
                             child: const Icon(Icons.location_searching),
+                          ),
+                        )),
+                    Positioned(
+                        bottom: 16,
+                        left: 16,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Colors.black, // set the border color
+                              width: 1.0, // set the border width
+                            ),
+                            borderRadius: BorderRadius.circular(
+                                50.0), // set the border radius
+                          ),
+                          child: FloatingActionButton(
+                            heroTag: null,
+                            foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+                            backgroundColor: secondaryColor,
+                            onPressed: _toggleroutesvisibility,
+                            child: Icon(_isrouteshown
+                                ? Icons.visibility
+                                : Icons.visibility_off),
                           ),
                         )),
                     Positioned(

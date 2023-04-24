@@ -48,6 +48,7 @@ dependencies:
   geoflutterfire: ^3.0.1
   flutter_polyline_points: ^1.0.0
   firebase_core_platform_interface: ^4.5.1
+  http: ^0.13.5
 
 
 
