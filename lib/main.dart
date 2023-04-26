@@ -27,6 +27,7 @@ void main() async {
   runApp(MyApp());
 }
 
+//SET AND DECLARE ROUTING DIRECTORIES
 class MyApp extends StatelessWidget {
   MyApp({Key? key}) : super(key: key);
   final Future<FirebaseApp> _fApp = Firebase.initializeApp();
@@ -59,21 +60,23 @@ class SplashScreen extends StatefulWidget {
   createState() => _SplashScreenState();
 }
 
-//splash screen
+//SPLASH SCREEN
 class _SplashScreenState extends State<SplashScreen> {
   final Connectivity _connectivity = Connectivity();
   @override
   void initState() {
     super.initState();
     checkConnectivity(); //check user connectivity to internet
-    _requestLocationPermission();
+    _requestLocationPermission(); //initially ask for user permission to show location
     // Simulate a delay before navigating to the home screen
   }
 
+  //initially ask for user permission to show location
   Future<void> _requestLocationPermission() async {
     await Permission.location.request();
   }
 
+  //check user connectivity to internet
   Future<void> checkConnectivity() async {
     ConnectivityResult connectivityResult =
         await _connectivity.checkConnectivity();
@@ -144,7 +147,6 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   //SPLASHSCREEN design
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -179,6 +181,7 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
+//adding splashscreen to tapped routes
 class SplashScreenWithCallback extends StatefulWidget {
   const SplashScreenWithCallback({Key? key, required this.onComplete})
       : super(key: key);
@@ -200,6 +203,7 @@ class _SplashScreenWithCallbackState extends State<SplashScreenWithCallback> {
     });
   }
 
+//splashscreen with callback design
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -224,6 +228,8 @@ class _SplashScreenWithCallbackState extends State<SplashScreenWithCallback> {
     );
   }
 }
+
+//homepage design
 
 class _MyHomePageState extends State<MyHomePage> {
   @override

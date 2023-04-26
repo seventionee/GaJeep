@@ -20,12 +20,15 @@ class Mapsinterface extends StatefulWidget {
 }
 
 class _Mapsinterface extends State<Mapsinterface> {
-  late GoogleMapController _controller;
-  Set<Polyline> _polylines = {};
-  bool _isrouteshown = true;
+  late GoogleMapController _controller; //for controlling google map interface
+  Set<Polyline> _polylines = {}; //for polylines
+  bool _isrouteshown = true; //for toggling polylines appearance
 
   LatLng _userLocation = const LatLng(10.298333, 123.893366);
-  StreamSubscription<Position>? _positionStreamSubscription;
+  StreamSubscription<Position>?
+      _positionStreamSubscription; //constantly check user position
+
+  //for maps style
   Future<String> getJsonFile(String path) async {
     return await rootBundle.loadString(path);
   }
@@ -42,12 +45,14 @@ class _Mapsinterface extends State<Mapsinterface> {
     });
   }
 
+  //toggling routes visibility via FAB
   void _toggleroutesvisibility() {
     setState(() {
       _isrouteshown = !_isrouteshown;
     });
   }
 
+  //building each polyline
   Future<List<Polyline>> getPolylinesFromFirestore() async {
     List<Polyline> polylines = [];
     int polylineIdCounter = 1;
@@ -67,6 +72,7 @@ class _Mapsinterface extends State<Mapsinterface> {
           .toList();
       debugPrint('Polyline fetch for $routeNumber: $latLngPoints');
 
+      //polyline color auto adjustible from rgb
       ui.Color polylineColor = ui.Color.fromARGB(
         255,
         HSVColor.fromAHSV(1.0, hueStep * (polylineIdCounter - 1), 1.0, 1.0)
@@ -98,6 +104,7 @@ class _Mapsinterface extends State<Mapsinterface> {
     await Permission.location.request();
   }
 
+  //constantly check user location
   void _subscribeUserLocationUpdates() async {
     bool serviceEnabled;
     LocationPermission permission;
@@ -135,7 +142,7 @@ class _Mapsinterface extends State<Mapsinterface> {
 
   @override
   void dispose() {
-    _positionStreamSubscription?.cancel(); // Add this line
+    _positionStreamSubscription?.cancel();
     super.dispose();
   }
 
@@ -151,11 +158,13 @@ class _Mapsinterface extends State<Mapsinterface> {
           }
           return MaterialApp(
             home: Scaffold(
+              //MENU
               drawer: Drawer(
                 child: ListView(
                   padding: EdgeInsets.zero,
                   //MENU
                   children: <Widget>[
+                    //MENU HEADER
                     const DrawerHeader(
                         decoration: BoxDecoration(
                           image: DecorationImage(
@@ -165,6 +174,7 @@ class _Mapsinterface extends State<Mapsinterface> {
                           ),
                         ),
                         child: null),
+                    //ROUTE DIRECTORY
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Container(
@@ -196,6 +206,7 @@ class _Mapsinterface extends State<Mapsinterface> {
                         ),
                       ),
                     ),
+                    //FARE CALCULATOR
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Container(
@@ -224,6 +235,7 @@ class _Mapsinterface extends State<Mapsinterface> {
                         ),
                       ),
                     ),
+                    //ABOUT GAJEEP
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Container(
@@ -259,9 +271,13 @@ class _Mapsinterface extends State<Mapsinterface> {
                   ],
                 ),
               ),
+              //END OF MENU DRAWER
+
+              //REST OF INTERFACE
               body: Builder(builder: (context) {
                 return Stack(
                   children: [
+                    //GOOGLE MAPS
                     GoogleMap(
                       onMapCreated: (GoogleMapController controller) async {
                         _controller = controller;
@@ -280,6 +296,8 @@ class _Mapsinterface extends State<Mapsinterface> {
                       mapToolbarEnabled: false,
                       polylines: _isrouteshown ? _polylines : {},
                     ),
+
+                    //MENU BUTTON
                     Positioned(
                         bottom: 90,
                         right: 16,
@@ -303,6 +321,8 @@ class _Mapsinterface extends State<Mapsinterface> {
                             child: const Icon(Icons.menu_rounded),
                           ),
                         )),
+
+                    //SHOW USER LOCATION FAB
                     Positioned(
                         bottom: 16,
                         right: 16,
@@ -325,6 +345,8 @@ class _Mapsinterface extends State<Mapsinterface> {
                             child: const Icon(Icons.location_searching),
                           ),
                         )),
+
+                    //TOGGLE DIRECTIONS APPERANCE FAB
                     Positioned(
                         bottom: 16,
                         left: 16,
@@ -347,6 +369,8 @@ class _Mapsinterface extends State<Mapsinterface> {
                                 : Icons.directions_off),
                           ),
                         )),
+
+                    //SEARCH MAP WIDGET
                     Positioned(
                       top: 50,
                       left: 16,
@@ -379,6 +403,7 @@ class _Mapsinterface extends State<Mapsinterface> {
     );
   }
 
+//PROMPT TO FORCE USER TO EXIT AFTER BACK BUTTON IS PRESSED
   Future<bool> _onBackPressed() async {
     showDialog(
       context: context,
