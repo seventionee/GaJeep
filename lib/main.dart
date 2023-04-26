@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'learnmore.dart';
-import 'mapsinterface.dart';
+import 'pages/learnmore.dart';
+import 'pages/mapsinterface.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter/services.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';

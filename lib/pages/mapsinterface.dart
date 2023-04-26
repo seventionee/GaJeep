@@ -5,7 +5,7 @@ import 'dart:async';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:search_map_place_updated/search_map_place_updated.dart';
-import 'component/constants.dart';
+import '../component/constants.dart';
 import 'learnmore.dart';
 import 'dart:ui' as ui;
 
