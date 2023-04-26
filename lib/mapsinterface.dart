@@ -96,7 +96,6 @@ class _Mapsinterface extends State<Mapsinterface> {
       polylines.add(polyline);
       polylineIdCounter++;
     }
-
     return polylines;
   }
 
