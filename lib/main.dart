@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-
 import 'pages/learnmore.dart';
 import 'pages/mapsinterface.dart';
-
 import 'package:firebase_core/firebase_core.dart';
 import 'pages/home.dart';
 
