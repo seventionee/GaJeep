@@ -18,13 +18,12 @@ void main() async {
           'https://gajeep-c5101-default-rtdb.asia-southeast1.firebasedatabase.app/',
     ),
   );
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 //SET AND DECLARE ROUTING DIRECTORIES
 class MyApp extends StatelessWidget {
-  MyApp({Key? key}) : super(key: key);
-  final Future<FirebaseApp> _fApp = Firebase.initializeApp();
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

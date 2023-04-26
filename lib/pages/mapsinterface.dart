@@ -3,13 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
 import 'package:geolocator/geolocator.dart';
-import 'package:permission_handler/permission_handler.dart';
+import '../providers/request_location_permission.dart';
 import 'package:search_map_place_updated/search_map_place_updated.dart';
 import '../component/constants.dart';
 import 'learnmore.dart';
-import 'dart:ui' as ui;
-
-import 'package:cloud_firestore/cloud_firestore.dart';
+import '../providers/polylinesdrawer.dart';
 
 // ignore: use_key_in_widget_constructors
 class Mapsinterface extends StatefulWidget {
@@ -20,13 +18,13 @@ class Mapsinterface extends StatefulWidget {
 }
 
 class _Mapsinterface extends State<Mapsinterface> {
-  late GoogleMapController _controller; //for controlling google map interface
-  Set<Polyline> _polylines = {}; //for polylines
+  late GoogleMapController mapcontroller; //for controlling google map interface
+  Set<Polyline> mappolylines = {}; //for polylines
   bool _isrouteshown = true; //for toggling polylines appearance
 
-  LatLng _userLocation = const LatLng(10.298333, 123.893366);
+  LatLng userLocation = const LatLng(10.298333, 123.893366);
   StreamSubscription<Position>?
-      _positionStreamSubscription; //constantly check user position
+      positionStreamSubscription; //constantly check user position
 
   //for maps style
   Future<String> getJsonFile(String path) async {
@@ -36,11 +34,11 @@ class _Mapsinterface extends State<Mapsinterface> {
   @override
   void initState() {
     super.initState();
-    _requestLocationPermission();
-    _subscribeUserLocationUpdates();
+    requestLocationPermission();
+    subscribeUserLocationUpdates();
     getPolylinesFromFirestore().then((polylines) {
       setState(() {
-        _polylines = polylines.toSet();
+        mappolylines = polylines.toSet();
       });
     });
   }
@@ -52,59 +50,8 @@ class _Mapsinterface extends State<Mapsinterface> {
     });
   }
 
-  //building each polyline
-  Future<List<Polyline>> getPolylinesFromFirestore() async {
-    List<Polyline> polylines = [];
-    int polylineIdCounter = 1;
-
-    CollectionReference collection =
-        FirebaseFirestore.instance.collection('Routes');
-    QuerySnapshot querySnapshot = await collection.get();
-
-    int numPolylines = querySnapshot.docs.length;
-    double hueStep = 360 / numPolylines;
-
-    for (QueryDocumentSnapshot doc in querySnapshot.docs) {
-      List<GeoPoint> geoPoints = List.from(doc['Route Points']);
-      String routeNumber = (doc['Route Number']);
-      List<LatLng> latLngPoints = geoPoints
-          .map((point) => LatLng(point.latitude, point.longitude))
-          .toList();
-      debugPrint('Polyline fetch for $routeNumber: $latLngPoints');
-
-      //polyline color auto adjustible from rgb
-      ui.Color polylineColor = ui.Color.fromARGB(
-        255,
-        HSVColor.fromAHSV(1.0, hueStep * (polylineIdCounter - 1), 1.0, 1.0)
-            .toColor()
-            .red,
-        HSVColor.fromAHSV(1.0, hueStep * (polylineIdCounter - 1), 1.0, 1.0)
-            .toColor()
-            .green,
-        HSVColor.fromAHSV(1.0, hueStep * (polylineIdCounter - 1), 1.0, 1.0)
-            .toColor()
-            .blue,
-      );
-
-      Polyline polyline = Polyline(
-          polylineId: PolylineId(polylineIdCounter.toString()),
-          points: latLngPoints,
-          color: polylineColor,
-          width: 5,
-          onTap: () {});
-
-      polylines.add(polyline);
-      polylineIdCounter++;
-    }
-    return polylines;
-  }
-
-  Future<void> _requestLocationPermission() async {
-    await Permission.location.request();
-  }
-
   //constantly check user location
-  void _subscribeUserLocationUpdates() async {
+  void subscribeUserLocationUpdates() async {
     bool serviceEnabled;
     LocationPermission permission;
 
@@ -126,22 +73,22 @@ class _Mapsinterface extends State<Mapsinterface> {
       }
     }
 
-    _positionStreamSubscription = Geolocator.getPositionStream(
+    positionStreamSubscription = Geolocator.getPositionStream(
         locationSettings: const LocationSettings(
       accuracy: LocationAccuracy.best,
       distanceFilter: 5,
     )).listen((Position position) {
       setState(() {
-        _userLocation = LatLng(position.latitude, position.longitude);
+        userLocation = LatLng(position.latitude, position.longitude);
       });
-      _controller.animateCamera(CameraUpdate.newCameraPosition(
-          CameraPosition(target: _userLocation, zoom: 17)));
+      mapcontroller.animateCamera(CameraUpdate.newCameraPosition(
+          CameraPosition(target: userLocation, zoom: 17)));
     });
   }
 
   @override
   void dispose() {
-    _positionStreamSubscription?.cancel();
+    positionStreamSubscription?.cancel();
     super.dispose();
   }
 
@@ -279,8 +226,8 @@ class _Mapsinterface extends State<Mapsinterface> {
                     //GOOGLE MAPS
                     GoogleMap(
                       onMapCreated: (GoogleMapController controller) async {
-                        _controller = controller;
-                        _controller.setMapStyle(snapshot.data!);
+                        mapcontroller = controller;
+                        mapcontroller.setMapStyle(snapshot.data!);
                       },
                       compassEnabled: false,
                       minMaxZoomPreference: const MinMaxZoomPreference(17, 19),
@@ -293,7 +240,7 @@ class _Mapsinterface extends State<Mapsinterface> {
                       zoomControlsEnabled: false, // Remove zoom controls
                       myLocationButtonEnabled: false, // Remove location button
                       mapToolbarEnabled: false,
-                      polylines: _isrouteshown ? _polylines : {},
+                      polylines: _isrouteshown ? mappolylines : {},
                     ),
 
                     //MENU BUTTON
@@ -338,9 +285,9 @@ class _Mapsinterface extends State<Mapsinterface> {
                             heroTag: null,
                             foregroundColor: const Color.fromARGB(255, 0, 0, 0),
                             backgroundColor: secondaryColor,
-                            onPressed: () => _controller.animateCamera(
+                            onPressed: () => mapcontroller.animateCamera(
                                 CameraUpdate.newCameraPosition(CameraPosition(
-                                    target: _userLocation, zoom: 17))),
+                                    target: userLocation, zoom: 17))),
                             child: const Icon(Icons.location_searching),
                           ),
                         )),
@@ -378,7 +325,7 @@ class _Mapsinterface extends State<Mapsinterface> {
                         apiKey: 'AIzaSyBOS4cS8wIYV2tRBhtf5O2hnIZ1Iley9Jc',
                         language: 'en',
                         bgColor: Colors.white,
-                        location: _userLocation,
+                        location: userLocation,
                         radius: 14697,
                         strictBounds: true,
                         iconColor: Colors.black,
@@ -388,7 +335,7 @@ class _Mapsinterface extends State<Mapsinterface> {
                           final geolocation = await place.geolocation;
                           final cameraUpdate =
                               CameraUpdate.newLatLng(geolocation!.coordinates!);
-                          _controller.animateCamera(cameraUpdate);
+                          mapcontroller.animateCamera(cameraUpdate);
                         },
                       ),
                     ),
