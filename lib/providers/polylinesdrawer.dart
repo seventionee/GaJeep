@@ -41,7 +41,10 @@ Future<List<Polyline>> getPolylinesFromFirestore() async {
         points: latLngPoints,
         color: polylineColor,
         width: 5,
-        onTap: () {});
+        consumeTapEvents: true,
+        onTap: () {
+          debugPrint("Polyline is Tapped!");
+        });
 
     polylines.add(polyline);
     polylineIdCounter++;
