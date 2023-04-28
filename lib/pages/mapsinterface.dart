@@ -36,7 +36,7 @@ class _Mapsinterface extends State<Mapsinterface> {
     super.initState();
     requestLocationPermission();
     subscribeUserLocationUpdates();
-    getPolylinesFromFirestore().then((polylines) {
+    getPolylinesFromFirestore(context).then((polylines) {
       setState(() {
         mappolylines = polylines.toSet();
       });

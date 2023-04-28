@@ -2,8 +2,9 @@ import 'dart:ui' as ui;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
+import '../providers/route_details.dart';
 
-Future<List<Polyline>> getPolylinesFromFirestore() async {
+Future<List<Polyline>> getPolylinesFromFirestore(BuildContext context) async {
   List<Polyline> polylines = [];
   int polylineIdCounter = 1;
 
@@ -17,6 +18,7 @@ Future<List<Polyline>> getPolylinesFromFirestore() async {
   for (QueryDocumentSnapshot doc in querySnapshot.docs) {
     List<GeoPoint> geoPoints = List.from(doc['Route Points']);
     String routeNumber = (doc['Route Number']);
+    String routeDescription = (doc['Route Description']);
     List<LatLng> latLngPoints = geoPoints
         .map((point) => LatLng(point.latitude, point.longitude))
         .toList();
@@ -43,7 +45,17 @@ Future<List<Polyline>> getPolylinesFromFirestore() async {
         width: 5,
         consumeTapEvents: true,
         onTap: () {
-          debugPrint("Polyline is Tapped!");
+          debugPrint('Polyline is TAPPED!');
+          showDialog(
+            context:
+                context, // Add BuildContext variable to be passed in the function
+            builder: (BuildContext context) {
+              return RouteDetailsModal(
+                routeName: routeNumber,
+                routeDescription: routeDescription,
+              );
+            },
+          );
         });
 
     polylines.add(polyline);
