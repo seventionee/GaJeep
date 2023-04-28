@@ -3,12 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
 import 'package:geolocator/geolocator.dart';
-import 'package:permission_handler/permission_handler.dart';
+import '../providers/request_location_permission.dart';
 import 'package:search_map_place_updated/search_map_place_updated.dart';
-import 'component/constants.dart';
+import '../component/constants.dart';
 import 'learnmore.dart';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
+import '../providers/polylinesdrawer.dart';
 
 // ignore: use_key_in_widget_constructors
 class Mapsinterface extends StatefulWidget {
@@ -19,11 +18,15 @@ class Mapsinterface extends StatefulWidget {
 }
 
 class _Mapsinterface extends State<Mapsinterface> {
-  late GoogleMapController _controller;
-  Set<Polyline> _polylines = {};
+  late GoogleMapController mapcontroller; //for controlling google map interface
+  Set<Polyline> mappolylines = {}; //for polylines
+  bool _isrouteshown = true; //for toggling polylines appearance
 
-  LatLng _userLocation = const LatLng(10.298333, 123.893366);
-  StreamSubscription<Position>? _positionStreamSubscription;
+  LatLng userLocation = const LatLng(10.298333, 123.893366);
+  StreamSubscription<Position>?
+      positionStreamSubscription; //constantly check user position
+
+  //for maps style
   Future<String> getJsonFile(String path) async {
     return await rootBundle.loadString(path);
   }
@@ -31,48 +34,24 @@ class _Mapsinterface extends State<Mapsinterface> {
   @override
   void initState() {
     super.initState();
-    _requestLocationPermission();
-    _subscribeUserLocationUpdates();
-    getPolylinesFromFirestore().then((polylines) {
+    requestLocationPermission();
+    subscribeUserLocationUpdates();
+    getPolylinesFromFirestore(context).then((polylines) {
       setState(() {
-        _polylines = polylines.toSet();
+        mappolylines = polylines.toSet();
       });
     });
   }
 
-  Future<List<Polyline>> getPolylinesFromFirestore() async {
-    List<Polyline> polylines = [];
-    int polylineIdCounter = 1;
-
-    CollectionReference collection =
-        FirebaseFirestore.instance.collection('Routes');
-    QuerySnapshot querySnapshot = await collection.get();
-
-    for (QueryDocumentSnapshot doc in querySnapshot.docs) {
-      List<GeoPoint> geoPoints = List.from(doc['Route Points']);
-      List<LatLng> latLngPoints = geoPoints
-          .map((point) => LatLng(point.latitude, point.longitude))
-          .toList();
-      debugPrint('Polyline fetch check $latLngPoints');
-      Polyline polyline = Polyline(
-        polylineId: PolylineId(polylineIdCounter.toString()),
-        points: latLngPoints,
-        color: Colors.blue,
-        width: 3,
-      );
-
-      polylines.add(polyline);
-      polylineIdCounter++;
-    }
-
-    return polylines;
+  //toggling routes visibility via FAB
+  void _toggleroutesvisibility() {
+    setState(() {
+      _isrouteshown = !_isrouteshown;
+    });
   }
 
-  Future<void> _requestLocationPermission() async {
-    await Permission.location.request();
-  }
-
-  void _subscribeUserLocationUpdates() async {
+  //constantly check user location
+  void subscribeUserLocationUpdates() async {
     bool serviceEnabled;
     LocationPermission permission;
 
@@ -94,22 +73,22 @@ class _Mapsinterface extends State<Mapsinterface> {
       }
     }
 
-    _positionStreamSubscription = Geolocator.getPositionStream(
+    positionStreamSubscription = Geolocator.getPositionStream(
         locationSettings: const LocationSettings(
       accuracy: LocationAccuracy.best,
       distanceFilter: 5,
     )).listen((Position position) {
       setState(() {
-        _userLocation = LatLng(position.latitude, position.longitude);
+        userLocation = LatLng(position.latitude, position.longitude);
       });
-      _controller.animateCamera(CameraUpdate.newCameraPosition(
-          CameraPosition(target: _userLocation, zoom: 17)));
+      mapcontroller.animateCamera(CameraUpdate.newCameraPosition(
+          CameraPosition(target: userLocation, zoom: 17)));
     });
   }
 
   @override
   void dispose() {
-    _positionStreamSubscription?.cancel(); // Add this line
+    positionStreamSubscription?.cancel();
     super.dispose();
   }
 
@@ -125,11 +104,13 @@ class _Mapsinterface extends State<Mapsinterface> {
           }
           return MaterialApp(
             home: Scaffold(
+              //MENU
               drawer: Drawer(
                 child: ListView(
                   padding: EdgeInsets.zero,
                   //MENU
                   children: <Widget>[
+                    //MENU HEADER
                     const DrawerHeader(
                         decoration: BoxDecoration(
                           image: DecorationImage(
@@ -139,6 +120,7 @@ class _Mapsinterface extends State<Mapsinterface> {
                           ),
                         ),
                         child: null),
+                    //ROUTE DIRECTORY
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Container(
@@ -170,6 +152,7 @@ class _Mapsinterface extends State<Mapsinterface> {
                         ),
                       ),
                     ),
+                    //FARE CALCULATOR
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Container(
@@ -198,6 +181,7 @@ class _Mapsinterface extends State<Mapsinterface> {
                         ),
                       ),
                     ),
+                    //ABOUT GAJEEP
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Container(
@@ -233,13 +217,17 @@ class _Mapsinterface extends State<Mapsinterface> {
                   ],
                 ),
               ),
+              //END OF MENU DRAWER
+
+              //REST OF INTERFACE
               body: Builder(builder: (context) {
                 return Stack(
                   children: [
+                    //GOOGLE MAPS
                     GoogleMap(
                       onMapCreated: (GoogleMapController controller) async {
-                        _controller = controller;
-                        _controller.setMapStyle(snapshot.data!);
+                        mapcontroller = controller;
+                        mapcontroller.setMapStyle(snapshot.data!);
                       },
                       compassEnabled: false,
                       minMaxZoomPreference: const MinMaxZoomPreference(17, 19),
@@ -252,8 +240,10 @@ class _Mapsinterface extends State<Mapsinterface> {
                       zoomControlsEnabled: false, // Remove zoom controls
                       myLocationButtonEnabled: false, // Remove location button
                       mapToolbarEnabled: false,
-                      polylines: _polylines,
+                      polylines: _isrouteshown ? mappolylines : {},
                     ),
+
+                    //MENU BUTTON
                     Positioned(
                         bottom: 90,
                         right: 16,
@@ -277,6 +267,8 @@ class _Mapsinterface extends State<Mapsinterface> {
                             child: const Icon(Icons.menu_rounded),
                           ),
                         )),
+
+                    //SHOW USER LOCATION FAB
                     Positioned(
                         bottom: 16,
                         right: 16,
@@ -293,12 +285,38 @@ class _Mapsinterface extends State<Mapsinterface> {
                             heroTag: null,
                             foregroundColor: const Color.fromARGB(255, 0, 0, 0),
                             backgroundColor: secondaryColor,
-                            onPressed: () => _controller.animateCamera(
+                            onPressed: () => mapcontroller.animateCamera(
                                 CameraUpdate.newCameraPosition(CameraPosition(
-                                    target: _userLocation, zoom: 17))),
+                                    target: userLocation, zoom: 17))),
                             child: const Icon(Icons.location_searching),
                           ),
                         )),
+
+                    //TOGGLE DIRECTIONS APPERANCE FAB
+                    Positioned(
+                        bottom: 16,
+                        left: 16,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Colors.black, // set the border color
+                              width: 1.0, // set the border width
+                            ),
+                            borderRadius: BorderRadius.circular(
+                                50.0), // set the border radius
+                          ),
+                          child: FloatingActionButton(
+                            heroTag: null,
+                            foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+                            backgroundColor: secondaryColor,
+                            onPressed: _toggleroutesvisibility,
+                            child: Icon(_isrouteshown
+                                ? Icons.directions
+                                : Icons.directions_off),
+                          ),
+                        )),
+
+                    //SEARCH MAP WIDGET
                     Positioned(
                       top: 50,
                       left: 16,
@@ -307,7 +325,7 @@ class _Mapsinterface extends State<Mapsinterface> {
                         apiKey: 'AIzaSyBOS4cS8wIYV2tRBhtf5O2hnIZ1Iley9Jc',
                         language: 'en',
                         bgColor: Colors.white,
-                        location: _userLocation,
+                        location: userLocation,
                         radius: 14697,
                         strictBounds: true,
                         iconColor: Colors.black,
@@ -317,7 +335,7 @@ class _Mapsinterface extends State<Mapsinterface> {
                           final geolocation = await place.geolocation;
                           final cameraUpdate =
                               CameraUpdate.newLatLng(geolocation!.coordinates!);
-                          _controller.animateCamera(cameraUpdate);
+                          mapcontroller.animateCamera(cameraUpdate);
                         },
                       ),
                     ),
@@ -331,6 +349,7 @@ class _Mapsinterface extends State<Mapsinterface> {
     );
   }
 
+//PROMPT TO FORCE USER TO EXIT AFTER BACK BUTTON IS PRESSED
   Future<bool> _onBackPressed() async {
     showDialog(
       context: context,
