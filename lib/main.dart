@@ -3,6 +3,8 @@ import 'pages/learnmore.dart';
 import 'pages/mapsinterface.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'pages/home.dart';
+import 'package:provider/provider.dart';
+import 'providers/jeeps_location.dart';
 
 //STARTING THE FLUTTER APP
 void main() async {
@@ -18,7 +20,14 @@ void main() async {
           'https://gajeep-c5101-default-rtdb.asia-southeast1.firebasedatabase.app/',
     ),
   );
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => VehicleLocationProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 //SET AND DECLARE ROUTING DIRECTORIES

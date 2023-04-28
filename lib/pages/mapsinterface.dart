@@ -8,6 +8,8 @@ import 'package:search_map_place_updated/search_map_place_updated.dart';
 import '../component/constants.dart';
 import 'learnmore.dart';
 import '../providers/polylinesdrawer.dart';
+import '../providers/jeeps_location.dart';
+import 'package:provider/provider.dart';
 
 // ignore: use_key_in_widget_constructors
 class Mapsinterface extends StatefulWidget {
@@ -224,24 +226,31 @@ class _Mapsinterface extends State<Mapsinterface> {
                 return Stack(
                   children: [
                     //GOOGLE MAPS
-                    GoogleMap(
-                      onMapCreated: (GoogleMapController controller) async {
-                        mapcontroller = controller;
-                        mapcontroller.setMapStyle(snapshot.data!);
-                      },
-                      compassEnabled: false,
-                      minMaxZoomPreference: const MinMaxZoomPreference(17, 19),
-                      mapType: MapType.normal,
-                      myLocationEnabled: true,
-                      initialCameraPosition: const CameraPosition(
-                        target: LatLng(10.3156173, 123.882969),
-                        zoom: 17,
-                      ),
-                      zoomControlsEnabled: false, // Remove zoom controls
-                      myLocationButtonEnabled: false, // Remove location button
-                      mapToolbarEnabled: false,
-                      polylines: _isrouteshown ? mappolylines : {},
-                    ),
+                    Consumer<VehicleLocationProvider>(
+                        builder: (context, vehicleLocationProvider, child) {
+                      return GoogleMap(
+                        onMapCreated: (GoogleMapController controller) async {
+                          mapcontroller = controller;
+                          mapcontroller.setMapStyle(snapshot.data!);
+                        },
+                        compassEnabled: false,
+                        minMaxZoomPreference:
+                            const MinMaxZoomPreference(17, 19),
+                        mapType: MapType.normal,
+                        myLocationEnabled: true,
+                        initialCameraPosition: const CameraPosition(
+                          target: LatLng(10.3156173, 123.882969),
+                          zoom: 17,
+                        ),
+                        zoomControlsEnabled: false, // Remove zoom controls
+                        myLocationButtonEnabled:
+                            false, // Remove location button
+                        mapToolbarEnabled: false,
+                        polylines: _isrouteshown ? mappolylines : {},
+                        markers: vehicleLocationProvider.vehicleMarkers.values
+                            .toSet(),
+                      );
+                    }),
 
                     //MENU BUTTON
                     Positioned(
