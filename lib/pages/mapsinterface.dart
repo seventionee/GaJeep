@@ -10,6 +10,7 @@ import 'learnmore.dart';
 import '../providers/polylinesdrawer.dart';
 import '../providers/jeeps_location.dart';
 import 'package:provider/provider.dart';
+import '../providers/jeep_info.dart';
 
 // ignore: use_key_in_widget_constructors
 class Mapsinterface extends StatefulWidget {
@@ -227,30 +228,62 @@ class _Mapsinterface extends State<Mapsinterface> {
                   children: [
                     //GOOGLE MAPS
                     Consumer<VehicleLocationProvider>(
-                        builder: (context, vehicleLocationProvider, child) {
-                      return GoogleMap(
-                        onMapCreated: (GoogleMapController controller) async {
-                          mapcontroller = controller;
-                          mapcontroller.setMapStyle(snapshot.data!);
-                        },
-                        compassEnabled: false,
-                        minMaxZoomPreference:
-                            const MinMaxZoomPreference(17, 19),
-                        mapType: MapType.normal,
-                        myLocationEnabled: true,
-                        initialCameraPosition: const CameraPosition(
-                          target: LatLng(10.3156173, 123.882969),
-                          zoom: 17,
-                        ),
-                        zoomControlsEnabled: false, // Remove zoom controls
-                        myLocationButtonEnabled:
-                            false, // Remove location button
-                        mapToolbarEnabled: false,
-                        polylines: _isrouteshown ? mappolylines : {},
-                        markers: vehicleLocationProvider.vehicleMarkers.values
-                            .toSet(),
-                      );
-                    }),
+                      builder: (context, vehicleLocationProvider, child) {
+                        debugPrint(
+                            'Selected marker: ${vehicleLocationProvider.selectedMarkerId}'); // Add this print statement
+                        debugPrint(
+                            'Selected jeep route: ${vehicleLocationProvider.selectedJeepRoute}'); // Add this print statement
+                        debugPrint(
+                            'Selected capacity status: ${vehicleLocationProvider.selectedCapacityStatus}'); // Add this print statement
+                        return Stack(
+                          children: [
+                            GoogleMap(
+                              onMapCreated:
+                                  (GoogleMapController controller) async {
+                                mapcontroller = controller;
+                                mapcontroller.setMapStyle(snapshot.data!);
+                              },
+                              compassEnabled: false,
+                              minMaxZoomPreference:
+                                  const MinMaxZoomPreference(17, 19),
+                              mapType: MapType.normal,
+                              myLocationEnabled: true,
+                              initialCameraPosition: const CameraPosition(
+                                target: LatLng(10.3156173, 123.882969),
+                                zoom: 17,
+                              ),
+                              zoomControlsEnabled:
+                                  false, // Remove zoom controls
+                              myLocationButtonEnabled:
+                                  false, // Remove location button
+                              mapToolbarEnabled: false,
+                              polylines: _isrouteshown ? mappolylines : {},
+                              markers: vehicleLocationProvider
+                                  .vehicleMarkers.values
+                                  .toSet(),
+                            ),
+                            if (vehicleLocationProvider.selectedMarkerId !=
+                                null)
+                              Align(
+                                alignment: Alignment.center,
+                                child: Visibility(
+                                  visible: vehicleLocationProvider
+                                          .selectedMarkerId !=
+                                      null,
+                                  child: VehicleInfoWidget(
+                                    jeepRoute: vehicleLocationProvider
+                                            .selectedJeepRoute ??
+                                        '',
+                                    capacityStatus: vehicleLocationProvider
+                                            .selectedCapacityStatus ??
+                                        '',
+                                  ),
+                                ),
+                              ),
+                          ],
+                        );
+                      },
+                    ),
 
                     //MENU BUTTON
                     Positioned(

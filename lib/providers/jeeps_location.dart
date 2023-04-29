@@ -3,6 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+class VehicleInfo {
+  final String jeepRoute;
+  final String capacityStatus;
+
+  VehicleInfo({required this.jeepRoute, required this.capacityStatus});
+}
+
 class VehicleLocationProvider with ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -11,6 +18,17 @@ class VehicleLocationProvider with ChangeNotifier {
   Map<MarkerId, Marker> get vehicleMarkers => _vehicleMarkers;
 
   StreamSubscription? _locationSubscription;
+
+  String? _selectedJeepRoute; // Add this line
+  String? _selectedCapacityStatus; // Add this line
+
+  MarkerId? _selectedMarkerId;
+
+  MarkerId? get selectedMarkerId => _selectedMarkerId;
+  String? get selectedJeepRoute =>
+      _vehicleMarkers[_selectedMarkerId]?.infoWindow.title;
+  String? get selectedCapacityStatus =>
+      _vehicleMarkers[_selectedMarkerId]?.infoWindow.snippet;
 
   VehicleLocationProvider() {
     _initVehicleMarkers();
@@ -34,7 +52,14 @@ class VehicleLocationProvider with ChangeNotifier {
       Marker marker = Marker(
         markerId: markerId,
         position: position,
-        infoWindow: InfoWindow(title: ' Jeep: $jeepRoute is $capacitystatus'),
+        onTap: () {
+          _selectedMarkerId = markerId;
+          _selectedJeepRoute = jeepRoute; // Add this line
+          _selectedCapacityStatus = capacitystatus; // Add this line
+
+          notifyListeners();
+        },
+        infoWindow: InfoWindow(title: jeepRoute, snippet: capacitystatus),
       );
       _vehicleMarkers[markerId] = marker;
       notifyListeners();
