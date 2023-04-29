@@ -25,8 +25,8 @@ class VehicleLocationProvider with ChangeNotifier {
   }
 
   void _updateMarker(DocumentSnapshot snapshot) {
-    if (snapshot.exists) {
-      MarkerId markerId = MarkerId(snapshot.id);
+    MarkerId markerId = MarkerId(snapshot.id);
+    if (snapshot.exists && snapshot['Status'] == 'Active') {
       GeoPoint location = snapshot['Location'];
       String jeepRoute = snapshot['Route Number'];
       String capacitystatus = snapshot['Capacity'];
@@ -37,6 +37,9 @@ class VehicleLocationProvider with ChangeNotifier {
         infoWindow: InfoWindow(title: ' Jeep: $jeepRoute is $capacitystatus'),
       );
       _vehicleMarkers[markerId] = marker;
+      notifyListeners();
+    } else if (_vehicleMarkers.containsKey(markerId)) {
+      _vehicleMarkers.remove(markerId);
       notifyListeners();
     }
   }
