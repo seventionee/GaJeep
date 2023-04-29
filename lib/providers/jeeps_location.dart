@@ -14,21 +14,20 @@ class VehicleLocationProvider with ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   final Map<MarkerId, Marker> _vehicleMarkers = {};
+  final Map<MarkerId, String> _previousCapacityStatus = {};
 
   Map<MarkerId, Marker> get vehicleMarkers => _vehicleMarkers;
 
   StreamSubscription? _locationSubscription;
 
-  String? _selectedJeepRoute; // Add this line
-  String? _selectedCapacityStatus; // Add this line
+  String? _selectedJeepRoute;
+  String? _selectedCapacityStatus;
 
   MarkerId? _selectedMarkerId;
 
   MarkerId? get selectedMarkerId => _selectedMarkerId;
-  String? get selectedJeepRoute =>
-      _vehicleMarkers[_selectedMarkerId]?.infoWindow.title;
-  String? get selectedCapacityStatus =>
-      _vehicleMarkers[_selectedMarkerId]?.infoWindow.snippet;
+  String? get selectedJeepRoute => _selectedJeepRoute;
+  String? get selectedCapacityStatus => _selectedCapacityStatus;
 
   VehicleLocationProvider() {
     _initVehicleMarkers();
@@ -47,24 +46,35 @@ class VehicleLocationProvider with ChangeNotifier {
     if (snapshot.exists && snapshot['Status'] == 'Active') {
       GeoPoint location = snapshot['Location'];
       String jeepRoute = snapshot['Route Number'];
-      String capacitystatus = snapshot['Capacity'];
+      String capacityStatus = snapshot['Capacity'];
       LatLng position = LatLng(location.latitude, location.longitude);
       Marker marker = Marker(
         markerId: markerId,
         position: position,
         onTap: () {
           _selectedMarkerId = markerId;
-          _selectedJeepRoute = jeepRoute; // Add this line
-          _selectedCapacityStatus = capacitystatus; // Add this line
+          _selectedJeepRoute = jeepRoute;
+          _selectedCapacityStatus = capacityStatus;
 
           notifyListeners();
         },
-        infoWindow: InfoWindow(title: jeepRoute, snippet: capacitystatus),
       );
+
+      // Check if capacityStatus has changed for the selected marker
+      bool capacityStatusChanged = _selectedMarkerId == markerId &&
+          _previousCapacityStatus[markerId] != capacityStatus;
+
+      if (capacityStatusChanged) {
+        _selectedCapacityStatus = capacityStatus;
+        notifyListeners();
+      }
+
+      _previousCapacityStatus[markerId] = capacityStatus;
       _vehicleMarkers[markerId] = marker;
       notifyListeners();
     } else if (_vehicleMarkers.containsKey(markerId)) {
       _vehicleMarkers.remove(markerId);
+      _previousCapacityStatus.remove(markerId);
       notifyListeners();
     }
   }

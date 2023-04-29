@@ -1,35 +1,76 @@
 import 'package:flutter/material.dart';
+import '../component/constants.dart';
 
 class VehicleInfoWidget extends StatefulWidget {
   final String jeepRoute;
   final String capacityStatus;
 
   const VehicleInfoWidget(
-      {required this.jeepRoute, required this.capacityStatus});
+      {super.key, required this.jeepRoute, required this.capacityStatus});
 
   @override
-  _VehicleInfoWidgetState createState() => _VehicleInfoWidgetState();
+  VehicleInfoWidgetState createState() => VehicleInfoWidgetState();
 }
 
-class _VehicleInfoWidgetState extends State<VehicleInfoWidget> {
+class VehicleInfoWidgetState extends State<VehicleInfoWidget> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(5),
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 5)],
+    return AlertDialog(
+      title: Text('Jeep Route: ${widget.jeepRoute}',
+          style: const TextStyle(
+            fontFamily: 'Epilogue', //font style
+            fontWeight: FontWeight.w400,
+            fontSize: 20.0,
+            color: Colors.black,
+          )),
+      content: SingleChildScrollView(
+        child: ListBody(
+          children: <Widget>[
+            Text('Capacity Status: ${widget.capacityStatus}',
+                style: const TextStyle(
+                  fontFamily: 'Epilogue', //font style
+                  fontWeight: FontWeight.w400,
+                  fontSize: 20.0,
+                  color: Colors.black,
+                )),
+          ],
+        ),
       ),
-      padding: EdgeInsets.all(8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Jeep: ${widget.jeepRoute}',
-              style: TextStyle(fontWeight: FontWeight.bold)),
-          Text('Capacity: ${widget.capacityStatus}'),
-        ],
-      ),
+      actions: <Widget>[
+        TextButton(
+          child: const Text('Close',
+              style: TextStyle(
+                fontFamily: 'Epilogue', //font style
+                fontWeight: FontWeight.w400,
+                fontSize: 20.0,
+                color: Colors.black,
+              )),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all<Color>(primaryColor),
+            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18.0),
+                side: const BorderSide(color: Colors.black),
+              ),
+            ),
+          ),
+          child: const Text(
+            'View Route',
+            style: TextStyle(
+              fontFamily: 'Epilogue', //font style
+              fontWeight: FontWeight.w400,
+              fontSize: 20.0,
+              color: Colors.black,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
