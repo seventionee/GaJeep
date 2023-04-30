@@ -47,6 +47,26 @@ class _Mapsinterface extends State<Mapsinterface> {
     });
   }
 
+  void onCameraMoveHandler(CameraPosition position,
+      VehicleLocationProvider vehicleLocationProvider) {
+    if (vehicleLocationProvider.selectedMarkerId != null) {
+      LatLng currentPosition = vehicleLocationProvider
+          .vehicleMarkers[vehicleLocationProvider.selectedMarkerId]!.position;
+
+      //getting distance
+      double distance = Geolocator.distanceBetween(
+          currentPosition.latitude,
+          currentPosition.longitude,
+          position.target.latitude,
+          position.target.longitude);
+
+      if (distance > 100) {
+        // You can adjust this threshold value as needed
+        vehicleLocationProvider.deselectMarker();
+      }
+    }
+  }
+
   //toggling routes visibility via FAB
   void _toggleroutesvisibility() {
     setState(() {
@@ -252,6 +272,10 @@ class _Mapsinterface extends State<Mapsinterface> {
                                 debugPrint('TAPPED ON GOOGLE MAPS');
                                 vehicleLocationProvider.deselectMarker();
                               },
+                              onCameraMove: (position) {
+                                onCameraMoveHandler(
+                                    position, vehicleLocationProvider);
+                              },
                               onMapCreated:
                                   (GoogleMapController controller) async {
                                 _mapControllerCompleter.complete(controller);
@@ -279,18 +303,31 @@ class _Mapsinterface extends State<Mapsinterface> {
                                 null)
                               Align(
                                 alignment: Alignment.center,
-                                child: Visibility(
-                                  visible: vehicleLocationProvider
-                                          .selectedMarkerId !=
-                                      null,
-                                  child: VehicleInfoWidget(
-                                    jeepRoute: vehicleLocationProvider
-                                            .selectedJeepRoute ??
-                                        '',
-                                    capacityStatus: vehicleLocationProvider
-                                            .selectedCapacityStatus ??
-                                        '',
-                                  ),
+                                child: FutureBuilder<bool>(
+                                  future: vehicleLocationProvider
+                                      .isMarkerVisible(vehicleLocationProvider
+                                          .selectedMarkerId),
+                                  builder: (BuildContext context,
+                                      AsyncSnapshot<bool> snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.done) {
+                                      return Visibility(
+                                        visible: snapshot.data ?? false,
+                                        child: VehicleInfoWidget(
+                                          jeepRoute: vehicleLocationProvider
+                                                  .selectedJeepRoute ??
+                                              '',
+                                          capacityStatus:
+                                              vehicleLocationProvider
+                                                      .selectedCapacityStatus ??
+                                                  '',
+                                        ),
+                                      );
+                                    } else {
+                                      return const SizedBox
+                                          .shrink(); // Show an empty widget while waiting for the result
+                                    }
+                                  },
                                 ),
                               ),
                           ],

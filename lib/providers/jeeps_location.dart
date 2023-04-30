@@ -16,6 +16,19 @@ class VehicleLocationProvider with ChangeNotifier {
   //to lock view on selected marker
   MarkerId? _lockedMarkerId;
 
+  //check if marker still exists
+  bool isSelectedMarkerValid() {
+    return _selectedMarkerId != null &&
+        _vehicleMarkers.containsKey(_selectedMarkerId);
+  }
+
+  Future<bool> isMarkerVisible(MarkerId? markerId) async {
+    if (markerId == null) return false;
+    // Introduce a delay to account for the brief moment the marker vanishes
+    await Future.delayed(const Duration(milliseconds: 100));
+    return _vehicleMarkers.containsKey(markerId);
+  }
+
   void updateMapController(GoogleMapController controller) {
     _mapController = controller;
   }
