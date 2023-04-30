@@ -10,6 +10,7 @@ import 'learnmore.dart';
 import '../providers/polylinesdrawer.dart';
 import '../providers/jeeps_location.dart';
 import 'package:provider/provider.dart';
+import '../providers/jeep_info.dart';
 
 // ignore: use_key_in_widget_constructors
 class Mapsinterface extends StatefulWidget {
@@ -20,7 +21,8 @@ class Mapsinterface extends StatefulWidget {
 }
 
 class _Mapsinterface extends State<Mapsinterface> {
-  late GoogleMapController mapcontroller; //for controlling google map interface
+  final Completer<GoogleMapController> _mapControllerCompleter =
+      Completer(); //for controlling google map interface
   Set<Polyline> mappolylines = {}; //for polylines
   bool _isrouteshown = true; //for toggling polylines appearance
 
@@ -45,11 +47,37 @@ class _Mapsinterface extends State<Mapsinterface> {
     });
   }
 
+  void onCameraMoveHandler(CameraPosition position,
+      VehicleLocationProvider vehicleLocationProvider) {
+    if (vehicleLocationProvider.selectedMarkerId != null) {
+      LatLng currentPosition = vehicleLocationProvider
+          .vehicleMarkers[vehicleLocationProvider.selectedMarkerId]!.position;
+
+      //getting distance
+      double distance = Geolocator.distanceBetween(
+          currentPosition.latitude,
+          currentPosition.longitude,
+          position.target.latitude,
+          position.target.longitude);
+
+      if (distance > 250) {
+        // You can adjust this threshold value as needed
+        vehicleLocationProvider.deselectMarker();
+      }
+    }
+  }
+
   //toggling routes visibility via FAB
   void _toggleroutesvisibility() {
     setState(() {
       _isrouteshown = !_isrouteshown;
     });
+  }
+
+  void updateMapController(
+      BuildContext context, GoogleMapController controller) {
+    Provider.of<VehicleLocationProvider>(context, listen: false)
+        .updateMapController(controller);
   }
 
   //constantly check user location
@@ -79,11 +107,14 @@ class _Mapsinterface extends State<Mapsinterface> {
         locationSettings: const LocationSettings(
       accuracy: LocationAccuracy.best,
       distanceFilter: 5,
-    )).listen((Position position) {
+    )).listen((Position position) async {
       setState(() {
         userLocation = LatLng(position.latitude, position.longitude);
       });
-      mapcontroller.animateCamera(CameraUpdate.newCameraPosition(
+      // Use the mapcontroller from the Completer
+      final GoogleMapController controller =
+          await _mapControllerCompleter.future;
+      controller.animateCamera(CameraUpdate.newCameraPosition(
           CameraPosition(target: userLocation, zoom: 17)));
     });
   }
@@ -227,30 +258,74 @@ class _Mapsinterface extends State<Mapsinterface> {
                   children: [
                     //GOOGLE MAPS
                     Consumer<VehicleLocationProvider>(
-                        builder: (context, vehicleLocationProvider, child) {
-                      return GoogleMap(
-                        onMapCreated: (GoogleMapController controller) async {
-                          mapcontroller = controller;
-                          mapcontroller.setMapStyle(snapshot.data!);
-                        },
-                        compassEnabled: false,
-                        minMaxZoomPreference:
-                            const MinMaxZoomPreference(17, 19),
-                        mapType: MapType.normal,
-                        myLocationEnabled: true,
-                        initialCameraPosition: const CameraPosition(
-                          target: LatLng(10.3156173, 123.882969),
-                          zoom: 17,
-                        ),
-                        zoomControlsEnabled: false, // Remove zoom controls
-                        myLocationButtonEnabled:
-                            false, // Remove location button
-                        mapToolbarEnabled: false,
-                        polylines: _isrouteshown ? mappolylines : {},
-                        markers: vehicleLocationProvider.vehicleMarkers.values
-                            .toSet(),
-                      );
-                    }),
+                      builder: (context, vehicleLocationProvider, child) {
+                        debugPrint(
+                            'Selected marker: ${vehicleLocationProvider.selectedMarkerId}'); // Add this print statement
+                        debugPrint(
+                            'Selected jeep route: ${vehicleLocationProvider.selectedJeepRoute}'); // Add this print statement
+                        debugPrint(
+                            'Selected capacity status: ${vehicleLocationProvider.selectedCapacityStatus}'); // Add this print statement
+                        return Stack(
+                          children: [
+                            GoogleMap(
+                              onTap: (LatLng position) {
+                                debugPrint('TAPPED ON GOOGLE MAPS');
+                                vehicleLocationProvider.deselectMarker();
+                              },
+                              onCameraMove: (position) {
+                                onCameraMoveHandler(
+                                    position, vehicleLocationProvider);
+                              },
+                              onMapCreated:
+                                  (GoogleMapController controller) async {
+                                _mapControllerCompleter.complete(controller);
+                                updateMapController(context, controller);
+                                controller.setMapStyle(snapshot.data!);
+                              },
+                              compassEnabled: false,
+                              minMaxZoomPreference:
+                                  const MinMaxZoomPreference(17, 19),
+                              mapType: MapType.normal,
+                              myLocationEnabled: true,
+                              initialCameraPosition: const CameraPosition(
+                                target: LatLng(10.3156173, 123.882969),
+                                zoom: 17,
+                              ),
+                              zoomControlsEnabled: false,
+                              myLocationButtonEnabled: false,
+                              mapToolbarEnabled: false,
+                              polylines: _isrouteshown ? mappolylines : {},
+                              markers: vehicleLocationProvider
+                                  .vehicleMarkers.values
+                                  .toSet(),
+                            ),
+                            if (vehicleLocationProvider.selectedMarkerId !=
+                                null)
+                              if (vehicleLocationProvider.selectedMarkerId !=
+                                      null &&
+                                  !vehicleLocationProvider.isUpdatingWidget)
+                                Align(
+                                  alignment: Alignment.center,
+                                  child: Visibility(
+                                    visible: vehicleLocationProvider
+                                                .selectedMarkerId !=
+                                            null &&
+                                        !vehicleLocationProvider
+                                            .isUpdatingWidget,
+                                    child: VehicleInfoWidget(
+                                      jeepRoute: vehicleLocationProvider
+                                              .selectedJeepRoute ??
+                                          '',
+                                      capacityStatus: vehicleLocationProvider
+                                              .selectedCapacityStatus ??
+                                          '',
+                                    ),
+                                  ),
+                                ),
+                          ],
+                        );
+                      },
+                    ),
 
                     //MENU BUTTON
                     Positioned(
@@ -279,27 +354,35 @@ class _Mapsinterface extends State<Mapsinterface> {
 
                     //SHOW USER LOCATION FAB
                     Positioned(
-                        bottom: 16,
-                        right: 16,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Colors.black, // set the border color
-                              width: 1.0, // set the border width
-                            ),
-                            borderRadius: BorderRadius.circular(
-                                50.0), // set the border radius
+                      bottom: 16,
+                      right: 16,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Colors.black, // set the border color
+                            width: 1.0, // set the border width
                           ),
-                          child: FloatingActionButton(
-                            heroTag: null,
-                            foregroundColor: const Color.fromARGB(255, 0, 0, 0),
-                            backgroundColor: secondaryColor,
-                            onPressed: () => mapcontroller.animateCamera(
-                                CameraUpdate.newCameraPosition(CameraPosition(
-                                    target: userLocation, zoom: 17))),
-                            child: const Icon(Icons.location_searching),
-                          ),
-                        )),
+                          borderRadius: BorderRadius.circular(
+                              50.0), // set the border radius
+                        ),
+                        child: FloatingActionButton(
+                          heroTag: null,
+                          foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+                          backgroundColor: secondaryColor,
+                          onPressed: () async {
+                            // Use the mapcontroller from the Completer
+                            final GoogleMapController controller =
+                                await _mapControllerCompleter.future;
+                            controller.animateCamera(
+                              CameraUpdate.newCameraPosition(
+                                CameraPosition(target: userLocation, zoom: 17),
+                              ),
+                            );
+                          },
+                          child: const Icon(Icons.location_searching),
+                        ),
+                      ),
+                    ),
 
                     //TOGGLE DIRECTIONS APPERANCE FAB
                     Positioned(
@@ -344,7 +427,10 @@ class _Mapsinterface extends State<Mapsinterface> {
                           final geolocation = await place.geolocation;
                           final cameraUpdate =
                               CameraUpdate.newLatLng(geolocation!.coordinates!);
-                          mapcontroller.animateCamera(cameraUpdate);
+                          // Use the mapcontroller from the Completer
+                          final GoogleMapController controller =
+                              await _mapControllerCompleter.future;
+                          controller.animateCamera(cameraUpdate);
                         },
                       ),
                     ),
