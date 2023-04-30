@@ -12,6 +12,28 @@ class VehicleInfo {
 
 class VehicleLocationProvider with ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  GoogleMapController? _mapController;
+  //to lock view on selected marker
+  MarkerId? _lockedMarkerId;
+
+  void updateMapController(GoogleMapController controller) {
+    _mapController = controller;
+  }
+
+  void _updateCameraPosition(
+      GoogleMapController? controller, LatLng newPosition) {
+    if (_lockedMarkerId != null &&
+        _selectedMarkerId == _lockedMarkerId &&
+        controller != null) {
+      controller.animateCamera(
+        CameraUpdate.newLatLng(newPosition),
+      );
+    }
+  }
+
+  void setMapController(GoogleMapController controller) {
+    _mapController = controller;
+  }
 
   void deselectMarker() {
     _selectedMarkerId = null;
@@ -62,10 +84,15 @@ class VehicleLocationProvider with ChangeNotifier {
           _selectedMarkerId = markerId;
           _selectedJeepRoute = jeepRoute;
           _selectedCapacityStatus = capacityStatus;
-
+          _lockedMarkerId = markerId; // Lock the marker when tapped
           notifyListeners();
         },
       );
+
+      // Update camera position if locked marker position changed
+      if (_lockedMarkerId == markerId) {
+        _updateCameraPosition(_mapController, position);
+      }
 
       // Check if capacityStatus has changed for the selected marker
       bool capacityStatusChanged = _selectedMarkerId == markerId &&
