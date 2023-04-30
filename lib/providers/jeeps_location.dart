@@ -13,6 +13,13 @@ class VehicleInfo {
 class VehicleLocationProvider with ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  void deselectMarker() {
+    _selectedMarkerId = null;
+    _selectedJeepRoute = null;
+    _selectedCapacityStatus = null;
+    notifyListeners();
+  }
+
   final Map<MarkerId, Marker> _vehicleMarkers = {};
   final Map<MarkerId, String> _previousCapacityStatus = {};
 

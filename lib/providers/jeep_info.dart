@@ -38,18 +38,6 @@ class VehicleInfoWidgetState extends State<VehicleInfoWidget> {
       ),
       actions: <Widget>[
         TextButton(
-          child: const Text('Close',
-              style: TextStyle(
-                fontFamily: 'Epilogue', //font style
-                fontWeight: FontWeight.w400,
-                fontSize: 20.0,
-                color: Colors.black,
-              )),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
-        TextButton(
           onPressed: () => Navigator.of(context).pop(false),
           style: ButtonStyle(
             backgroundColor: MaterialStateProperty.all<Color>(primaryColor),

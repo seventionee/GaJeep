@@ -238,6 +238,10 @@ class _Mapsinterface extends State<Mapsinterface> {
                         return Stack(
                           children: [
                             GoogleMap(
+                              onTap: (LatLng position) {
+                                debugPrint('TAPPED ON GOOGLE MAPS');
+                                vehicleLocationProvider.deselectMarker();
+                              },
                               onMapCreated:
                                   (GoogleMapController controller) async {
                                 mapcontroller = controller;
@@ -252,10 +256,8 @@ class _Mapsinterface extends State<Mapsinterface> {
                                 target: LatLng(10.3156173, 123.882969),
                                 zoom: 17,
                               ),
-                              zoomControlsEnabled:
-                                  false, // Remove zoom controls
-                              myLocationButtonEnabled:
-                                  false, // Remove location button
+                              zoomControlsEnabled: false,
+                              myLocationButtonEnabled: false,
                               mapToolbarEnabled: false,
                               polylines: _isrouteshown ? mappolylines : {},
                               markers: vehicleLocationProvider
