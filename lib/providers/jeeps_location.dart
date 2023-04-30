@@ -13,24 +13,14 @@ class VehicleInfo {
 class VehicleLocationProvider with ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   GoogleMapController? _mapController;
-  //to lock view on selected marker
+
   MarkerId? _lockedMarkerId;
 
-  //check if marker still exists
-  bool isSelectedMarkerValid() {
-    return _selectedMarkerId != null &&
-        _vehicleMarkers.containsKey(_selectedMarkerId);
-  }
-
-  Future<bool> isMarkerVisible(MarkerId? markerId) async {
-    if (markerId == null) return false;
-    // Introduce a delay to account for the brief moment the marker vanishes
-    await Future.delayed(const Duration(milliseconds: 100));
-    return _vehicleMarkers.containsKey(markerId);
-  }
-
-  void updateMapController(GoogleMapController controller) {
-    _mapController = controller;
+  void deselectMarker() {
+    _selectedMarkerId = null;
+    _selectedJeepRoute = null;
+    _selectedCapacityStatus = null;
+    notifyListeners();
   }
 
   void _updateCameraPosition(
@@ -44,15 +34,12 @@ class VehicleLocationProvider with ChangeNotifier {
     }
   }
 
-  void setMapController(GoogleMapController controller) {
-    _mapController = controller;
-  }
+  final bool _updatingWidget = false;
 
-  void deselectMarker() {
-    _selectedMarkerId = null;
-    _selectedJeepRoute = null;
-    _selectedCapacityStatus = null;
-    notifyListeners();
+  bool get isUpdatingWidget => _updatingWidget;
+
+  void updateMapController(GoogleMapController controller) {
+    _mapController = controller;
   }
 
   final Map<MarkerId, Marker> _vehicleMarkers = {};

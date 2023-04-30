@@ -60,7 +60,7 @@ class _Mapsinterface extends State<Mapsinterface> {
           position.target.latitude,
           position.target.longitude);
 
-      if (distance > 100) {
+      if (distance > 250) {
         // You can adjust this threshold value as needed
         vehicleLocationProvider.deselectMarker();
       }
@@ -301,35 +301,27 @@ class _Mapsinterface extends State<Mapsinterface> {
                             ),
                             if (vehicleLocationProvider.selectedMarkerId !=
                                 null)
-                              Align(
-                                alignment: Alignment.center,
-                                child: FutureBuilder<bool>(
-                                  future: vehicleLocationProvider
-                                      .isMarkerVisible(vehicleLocationProvider
-                                          .selectedMarkerId),
-                                  builder: (BuildContext context,
-                                      AsyncSnapshot<bool> snapshot) {
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.done) {
-                                      return Visibility(
-                                        visible: snapshot.data ?? false,
-                                        child: VehicleInfoWidget(
-                                          jeepRoute: vehicleLocationProvider
-                                                  .selectedJeepRoute ??
-                                              '',
-                                          capacityStatus:
-                                              vehicleLocationProvider
-                                                      .selectedCapacityStatus ??
-                                                  '',
-                                        ),
-                                      );
-                                    } else {
-                                      return const SizedBox
-                                          .shrink(); // Show an empty widget while waiting for the result
-                                    }
-                                  },
+                              if (vehicleLocationProvider.selectedMarkerId !=
+                                      null &&
+                                  !vehicleLocationProvider.isUpdatingWidget)
+                                Align(
+                                  alignment: Alignment.center,
+                                  child: Visibility(
+                                    visible: vehicleLocationProvider
+                                                .selectedMarkerId !=
+                                            null &&
+                                        !vehicleLocationProvider
+                                            .isUpdatingWidget,
+                                    child: VehicleInfoWidget(
+                                      jeepRoute: vehicleLocationProvider
+                                              .selectedJeepRoute ??
+                                          '',
+                                      capacityStatus: vehicleLocationProvider
+                                              .selectedCapacityStatus ??
+                                          '',
+                                    ),
+                                  ),
                                 ),
-                              ),
                           ],
                         );
                       },
