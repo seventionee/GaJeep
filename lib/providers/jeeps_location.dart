@@ -70,7 +70,7 @@ class VehicleLocationProvider with ChangeNotifier {
     });
   }
 
-  void _updateMarker(DocumentSnapshot snapshot) {
+  void _updateMarker(DocumentSnapshot snapshot) async {
     MarkerId markerId = MarkerId(snapshot.id);
     if (snapshot.exists && snapshot['Status'] == 'Active') {
       GeoPoint location = snapshot['Location'];
@@ -109,7 +109,12 @@ class VehicleLocationProvider with ChangeNotifier {
     } else if (_vehicleMarkers.containsKey(markerId)) {
       _vehicleMarkers.remove(markerId);
       _previousCapacityStatus.remove(markerId);
-      notifyListeners();
+
+      if (_selectedMarkerId == markerId) {
+        deselectMarker();
+      } else {
+        notifyListeners();
+      }
     }
   }
 
