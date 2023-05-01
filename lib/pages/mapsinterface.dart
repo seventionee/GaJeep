@@ -11,6 +11,7 @@ import '../providers/polylinesdrawer.dart';
 import '../providers/jeeps_location.dart';
 import 'package:provider/provider.dart';
 import '../providers/jeep_info.dart';
+import 'routes_directory.dart';
 
 // ignore: use_key_in_widget_constructors
 class Mapsinterface extends StatefulWidget {
@@ -180,7 +181,8 @@ class _Mapsinterface extends State<Mapsinterface> {
                               Icons.directions_transit_filled_sharp,
                               color: Colors.black),
                           onTap: () {
-                            // Add your action here
+                            Navigator.of(context)
+                                .pushNamed(RoutesDirectory.routeName);
                           },
                         ),
                       ),
