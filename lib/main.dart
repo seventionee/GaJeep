@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'pages/learnmore.dart';
 import 'pages/mapsinterface.dart';
+import 'pages/routes_directory.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'pages/home.dart';
 import 'package:provider/provider.dart';
@@ -50,6 +51,7 @@ class MyApp extends StatelessWidget {
       routes: {
         LearnMorePage.routeName: (context) => const LearnMorePage(),
         Mapsinterface.routeName: (context) => const Mapsinterface(),
+        RoutesDirectory.routeName: (context) => const RoutesDirectory(),
       },
     );
   }
