@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import '../component/constants.dart';
+import '../providers/polylinesdrawer.dart';
 
 class RouteDetailsModal extends StatefulWidget {
   final String routeName;
   final String routeDescription;
 
   const RouteDetailsModal(
-      {super.key, required this.routeName, required this.routeDescription});
+      {Key? key, required this.routeName, required this.routeDescription})
+      : super(key: key);
 
   @override
   RouteDetailsModalState createState() => RouteDetailsModalState();
@@ -33,6 +35,39 @@ class RouteDetailsModalState extends State<RouteDetailsModal> {
                   fontSize: 20.0,
                   color: Colors.black,
                 )),
+            StreamBuilder<int>(
+              stream: getActiveVehiclesForRoute(widget.routeName),
+              builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    const Text('Available jeeps: ',
+                        style: TextStyle(
+                          fontFamily: 'Epilogue', //font style
+                          fontWeight: FontWeight.w400,
+                          fontSize: 20.0,
+                          color: Colors.black,
+                        )),
+                    if (snapshot.connectionState == ConnectionState.waiting)
+                      const SizedBox(
+                        width: 20.0,
+                        height: 20.0,
+                        child: CircularProgressIndicator(color: Colors.white),
+                      )
+                    else if (snapshot.hasError)
+                      Text('Error: ${snapshot.error}')
+                    else
+                      Text('${snapshot.data}',
+                          style: const TextStyle(
+                            fontFamily: 'Epilogue', //font style
+                            fontWeight: FontWeight.w400,
+                            fontSize: 20.0,
+                            color: Colors.black,
+                          )),
+                  ],
+                );
+              },
+            ),
           ],
         ),
       ),

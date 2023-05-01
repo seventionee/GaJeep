@@ -4,18 +4,16 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
 import '../providers/route_details.dart';
 
-// Modify the function to accept routeNumber
-Future<int> getActiveVehiclesForRoute(String routeNumber) async {
+Stream<int> getActiveVehiclesForRoute(String routeNumber) async* {
   CollectionReference collection =
       FirebaseFirestore.instance.collection('Routes');
   DocumentSnapshot routeDoc = await collection.doc(routeNumber).get();
 
-  QuerySnapshot vehicleSnapshot = await routeDoc.reference
+  yield* routeDoc.reference
       .collection('Vehicles')
       .where('Status', isEqualTo: 'Active')
-      .get();
-
-  return vehicleSnapshot.docs.length;
+      .snapshots()
+      .map((snapshot) => snapshot.docs.length);
 }
 
 Future<List<Polyline>> getPolylinesFromFirestore(BuildContext context) async {
@@ -51,10 +49,6 @@ Future<List<Polyline>> getPolylinesFromFirestore(BuildContext context) async {
           .toColor()
           .blue,
     );
-
-    // Call the modified function and print the active vehicles for the specific route
-    int activeVehiclesForRoute = await getActiveVehiclesForRoute(routeNumber);
-    debugPrint('Active vehicles for $routeNumber: $activeVehiclesForRoute');
 
     Polyline polyline = Polyline(
         polylineId: PolylineId(polylineIdCounter.toString()),
