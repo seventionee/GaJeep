@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../providers/polylinesdrawer.dart';
+import '../component/constants.dart';
 
 class RouteDetails extends StatefulWidget {
   final String routeNumber;
@@ -32,7 +33,21 @@ class _RouteDetailsState extends State<RouteDetails> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Route Details - ${widget.routeNumber}'),
+        leading: IconButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            icon: const Icon(Icons.arrow_back),
+            color: Colors.black),
+        title: Text(
+          '${widget.routeNumber} - Route Details',
+          style: const TextStyle(
+            fontFamily: 'Epilogue', //font style
+            fontWeight: FontWeight.w400,
+            fontSize: 20.0,
+            color: Colors.black,
+          ),
+        ),
       ),
       body: FutureBuilder<DocumentSnapshot>(
         future: _routeDocFuture,
