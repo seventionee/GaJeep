@@ -129,7 +129,24 @@ class _Mapsinterface extends State<Mapsinterface> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: _onBackPressed,
+      onWillPop: () async {
+        // Access the VehicleLocationProvider using context.read
+        VehicleLocationProvider vehicleLocationProvider =
+            context.read<VehicleLocationProvider>();
+
+        // Check if the VehicleInfoWidget is visible
+        if (vehicleLocationProvider.selectedMarkerId != null &&
+            !vehicleLocationProvider.isUpdatingWidget) {
+          // Hide the VehicleInfoWidget
+          Navigator.of(context).pushNamed(
+            Mapsinterface.routeName,
+          );
+          return false;
+        }
+
+        // Show the exit prompt
+        return true;
+      },
       child: FutureBuilder(
         future: getJsonFile('asset/mapstyle.json'),
         builder: (context, snapshot) {
