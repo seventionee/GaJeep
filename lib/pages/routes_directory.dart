@@ -125,7 +125,6 @@ class RoutesDirectory extends StatelessWidget {
                               MaterialPageRoute(
                                 builder: (context) => RouteDetails(
                                   routeNumber: routeNumber,
-                                  routeDescription: routeDescription,
                                 ),
                               ),
                             );

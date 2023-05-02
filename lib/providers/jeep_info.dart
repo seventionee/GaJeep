@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../component/constants.dart';
+import '../dynamic_pages/route_details_screen.dart';
 
 class VehicleInfoWidget extends StatefulWidget {
   final String jeepRoute;
@@ -50,7 +51,16 @@ class VehicleInfoWidgetState extends State<VehicleInfoWidget> {
           actions: <Widget>[
             Center(
               child: TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => RouteDetails(
+                        routeNumber: widget.jeepRoute,
+                      ),
+                    ),
+                  );
+                },
                 style: ButtonStyle(
                   backgroundColor:
                       MaterialStateProperty.all<Color>(primaryColor),

@@ -92,7 +92,6 @@ class RouteDetailsModalState extends State<RouteDetailsModal> {
               MaterialPageRoute(
                 builder: (context) => RouteDetails(
                   routeNumber: widget.routeName,
-                  routeDescription: widget.routeDescription,
                 ),
               ),
             );
