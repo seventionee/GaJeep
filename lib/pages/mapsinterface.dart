@@ -286,7 +286,7 @@ class _Mapsinterface extends State<Mapsinterface> {
                               },
                               compassEnabled: false,
                               minMaxZoomPreference:
-                                  const MinMaxZoomPreference(17, 19),
+                                  const MinMaxZoomPreference(15, 20),
                               mapType: MapType.normal,
                               myLocationEnabled: true,
                               initialCameraPosition: const CameraPosition(

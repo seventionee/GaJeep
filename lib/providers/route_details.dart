@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../component/constants.dart';
 import '../providers/polylinesdrawer.dart';
+import '../dynamic_pages/route_details_screen.dart';
 
 class RouteDetailsModal extends StatefulWidget {
   final String routeName;
@@ -85,7 +86,16 @@ class RouteDetailsModalState extends State<RouteDetailsModal> {
           },
         ),
         TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => RouteDetails(
+                  routeNumber: widget.routeName,
+                ),
+              ),
+            );
+          },
           style: ButtonStyle(
             backgroundColor: MaterialStateProperty.all<Color>(primaryColor),
             shape: MaterialStateProperty.all<RoundedRectangleBorder>(

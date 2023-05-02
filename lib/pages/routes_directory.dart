@@ -2,6 +2,7 @@ import '../providers/polylinesdrawer.dart';
 import '../component/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../dynamic_pages/route_details_screen.dart';
 
 class RoutesDirectory extends StatelessWidget {
   const RoutesDirectory({Key? key}) : super(key: key);
@@ -119,7 +120,14 @@ class RoutesDirectory extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: TextButton(
                           onPressed: () {
-                            // Handle 'View Route' button press
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => RouteDetails(
+                                  routeNumber: routeNumber,
+                                ),
+                              ),
+                            );
                           },
                           style: ButtonStyle(
                             backgroundColor: MaterialStateProperty.all<Color>(

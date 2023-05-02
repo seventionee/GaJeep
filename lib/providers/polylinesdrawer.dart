@@ -16,6 +16,25 @@ Stream<int> getActiveVehiclesForRoute(String routeNumber) async* {
       .map((snapshot) => snapshot.docs.length);
 }
 
+Stream<List<Map<String, dynamic>>> getActiveVehiclesListForRoute(
+    String routeNumber) async* {
+  CollectionReference collection =
+      FirebaseFirestore.instance.collection('Routes');
+  DocumentSnapshot routeDoc = await collection.doc(routeNumber).get();
+
+  yield* routeDoc.reference
+      .collection('Vehicles')
+      .where('Status', isEqualTo: 'Active')
+      .snapshots()
+      .map((snapshot) => snapshot.docs.map((doc) {
+            return {
+              'id': doc.id,
+              'plateNumber': doc['Plate Number'],
+              'capacityStatus': doc['Capacity']
+            };
+          }).toList());
+}
+
 Future<List<Polyline>> getPolylinesFromFirestore(BuildContext context) async {
   List<Polyline> polylines = [];
   int polylineIdCounter = 1;
@@ -54,7 +73,7 @@ Future<List<Polyline>> getPolylinesFromFirestore(BuildContext context) async {
         polylineId: PolylineId(polylineIdCounter.toString()),
         points: latLngPoints,
         color: polylineColor,
-        width: 5,
+        width: 3,
         consumeTapEvents: true,
         onTap: () {
           debugPrint('Polyline is TAPPED!');
