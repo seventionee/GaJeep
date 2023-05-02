@@ -73,7 +73,7 @@ Future<List<Polyline>> getPolylinesFromFirestore(BuildContext context) async {
         polylineId: PolylineId(polylineIdCounter.toString()),
         points: latLngPoints,
         color: polylineColor,
-        width: 5,
+        width: 3,
         consumeTapEvents: true,
         onTap: () {
           debugPrint('Polyline is TAPPED!');

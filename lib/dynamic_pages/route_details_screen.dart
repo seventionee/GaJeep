@@ -54,7 +54,10 @@ class _RouteDetailsState extends State<RouteDetails> {
         builder:
             (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+                child: CircularProgressIndicator(
+              color: Colors.white,
+            ));
           }
 
           if (snapshot.hasError) {
@@ -66,28 +69,70 @@ class _RouteDetailsState extends State<RouteDetails> {
           return ListView(
             children: [
               ListTile(
-                title: Text('Route Number: $routeNumber'),
-                subtitle: Text('Route Description: ${widget.routeDescription}'),
+                title: Text(
+                  'Route Number: $routeNumber',
+                  style: const TextStyle(
+                    fontFamily: 'Epilogue', //font style
+                    fontWeight: FontWeight.w400,
+                    fontSize: 20.0,
+                    color: Colors.black,
+                  ),
+                ),
+                subtitle: Text(
+                  'Route Description: ${widget.routeDescription}',
+                  style: const TextStyle(
+                    fontFamily: 'Epilogue', //font style
+                    fontWeight: FontWeight.w400,
+                    fontSize: 20.0,
+                    color: Colors.black,
+                  ),
+                ),
               ),
               ListTile(
-                title: const Text('Number of Active Vehicles'),
+                title: const Text(
+                  'Number of Active Vehicles',
+                  style: TextStyle(
+                    fontFamily: 'Epilogue', //font style
+                    fontWeight: FontWeight.w400,
+                    fontSize: 20.0,
+                    color: Colors.black,
+                  ),
+                ),
                 subtitle: StreamBuilder<int>(
                   stream: getActiveVehiclesForRoute(widget.routeNumber),
                   builder: (BuildContext context,
                       AsyncSnapshot<int> activeVehiclesSnapshot) {
                     if (activeVehiclesSnapshot.connectionState ==
                         ConnectionState.waiting) {
-                      return const CircularProgressIndicator();
+                      return const CircularProgressIndicator(
+                        color: Colors.white,
+                      );
                     }
                     if (activeVehiclesSnapshot.hasError) {
                       return Text('Error: ${activeVehiclesSnapshot.error}');
                     }
-                    return Text('${activeVehiclesSnapshot.data}');
+                    return Text(
+                      '${activeVehiclesSnapshot.data}',
+                      style: const TextStyle(
+                        fontFamily: 'Epilogue', //font style
+                        fontWeight: FontWeight.w400,
+                        fontSize: 20.0,
+                        color: Colors.black,
+                      ),
+                    );
                   },
                 ),
               ),
               const ListTile(
-                title: Text('List of Active Vehicles'),
+                title: Text(
+                  'List of Active Vehicles',
+                  style: TextStyle(
+                    fontFamily: 'Epilogue', //font style
+                    fontWeight: FontWeight.w400,
+                    fontSize: 20.0,
+                    color: Colors.black,
+                  ),
+                ),
               ),
               StreamBuilder<List<Map<String, dynamic>>>(
                 stream: getActiveVehiclesListForRoute(widget.routeNumber),
@@ -96,7 +141,9 @@ class _RouteDetailsState extends State<RouteDetails> {
                         activeVehiclesListSnapshot) {
                   if (activeVehiclesListSnapshot.connectionState ==
                       ConnectionState.waiting) {
-                    return const CircularProgressIndicator();
+                    return const CircularProgressIndicator(
+                      color: Colors.white,
+                    );
                   }
                   if (activeVehiclesListSnapshot.hasError) {
                     return Text('Error: ${activeVehiclesListSnapshot.error}');
@@ -112,8 +159,24 @@ class _RouteDetailsState extends State<RouteDetails> {
                       String capacityStatus = vehicle['capacityStatus'];
 
                       return ListTile(
-                        title: Text('Plate Number: $plateNumber'),
-                        subtitle: Text('Capacity Status: $capacityStatus'),
+                        title: Text(
+                          'Plate Number: $plateNumber',
+                          style: const TextStyle(
+                            fontFamily: 'Epilogue', //font style
+                            fontWeight: FontWeight.w400,
+                            fontSize: 20.0,
+                            color: Colors.black,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'Capacity Status: $capacityStatus',
+                          style: const TextStyle(
+                            fontFamily: 'Epilogue', //font style
+                            fontWeight: FontWeight.w400,
+                            fontSize: 20.0,
+                            color: Colors.black,
+                          ),
+                        ),
                         onTap: () {
                           // Handle vehicle tap
                         },
