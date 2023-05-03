@@ -167,7 +167,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 builder: (BuildContext context) => SplashScreenWithCallback(
                   onComplete: () {
                     Navigator.pop(context); // Close the splash screen dialog
-                    Navigator.of(context).pushReplacementNamed(
+                    Navigator.of(context).pushNamed(
                       Mapsinterface.routeName,
                     );
                   },

@@ -128,14 +128,16 @@ class _Mapsinterface extends State<Mapsinterface> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: getJsonFile('asset/mapstyle.json'),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return Container();
-        }
-        return MaterialApp(
-          home: Scaffold(
+    return WillPopScope(
+      onWillPop: _onBackPressed,
+      child: FutureBuilder(
+        future: getJsonFile('asset/mapstyle.json'),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const SizedBox.shrink();
+          }
+
+          return Scaffold(
             //MENU
             drawer: Drawer(
               child: ListView(
@@ -435,9 +437,75 @@ class _Mapsinterface extends State<Mapsinterface> {
                 ],
               );
             }),
+          );
+        },
+      ),
+    );
+  }
+
+  Future<bool> _onBackPressed() async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            'Exit',
+            style: TextStyle(
+              fontFamily: 'Epilogue', //font style
+              fontWeight: FontWeight.w400,
+              fontSize: 20.0,
+              color: Colors.black,
+            ),
           ),
+          content: const Text(
+            'Are you sure you want to exit?',
+            style: TextStyle(
+              fontFamily: 'Epilogue', //font style
+              fontWeight: FontWeight.w400,
+              fontSize: 20.0,
+              color: Colors.black,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all<Color>(primaryColor),
+                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18.0),
+                    side: const BorderSide(color: Colors.black),
+                  ),
+                ),
+              ),
+              child: const Text(
+                'No',
+                style: TextStyle(
+                  fontFamily: 'Epilogue', //font style
+                  fontWeight: FontWeight.w400,
+                  fontSize: 20.0,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                SystemNavigator.pop();
+              },
+              child: const Text(
+                'Yes',
+                style: TextStyle(
+                  fontFamily: 'Epilogue', //font style
+                  fontWeight: FontWeight.w400,
+                  fontSize: 20.0,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+          ],
         );
       },
     );
+    return false;
   }
 }
