@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../pages/mapsinterface.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../providers/polylinesdrawer.dart';
 import '../component/constants.dart';
@@ -158,6 +159,10 @@ class _RouteDetailsState extends State<RouteDetails> {
                           activeVehiclesListSnapshot.data![index];
                       String plateNumber = vehicle['plateNumber'];
                       String capacityStatus = vehicle['capacityStatus'];
+                      GeoPoint vehicleLocationGeoPoint = vehicle['Location'];
+                      LatLng vehicleLocation = LatLng(
+                          vehicleLocationGeoPoint.latitude,
+                          vehicleLocationGeoPoint.longitude);
 
                       return ListTile(
                         title: Text(
@@ -179,7 +184,14 @@ class _RouteDetailsState extends State<RouteDetails> {
                           ),
                         ),
                         onTap: () {
-                          // Handle vehicle tap
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Mapsinterface(
+                                initialPosition: vehicleLocation,
+                              ),
+                            ),
+                          );
                         },
                       );
                     },

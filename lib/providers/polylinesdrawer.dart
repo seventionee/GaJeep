@@ -30,7 +30,8 @@ Stream<List<Map<String, dynamic>>> getActiveVehiclesListForRoute(
             return {
               'id': doc.id,
               'plateNumber': doc['Plate Number'],
-              'capacityStatus': doc['Capacity']
+              'capacityStatus': doc['Capacity'],
+              'Location': doc['Location']
             };
           }).toList());
 }

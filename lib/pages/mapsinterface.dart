@@ -16,7 +16,10 @@ import 'routes_directory.dart';
 // ignore: use_key_in_widget_constructors
 class Mapsinterface extends StatefulWidget {
   static const routeName = '/mapsinterface';
-  const Mapsinterface({Key? key}) : super(key: key);
+  final LatLng initialPosition;
+
+  const Mapsinterface({Key? key, required this.initialPosition})
+      : super(key: key);
   @override
   createState() => _Mapsinterface();
 }
@@ -28,6 +31,7 @@ class _Mapsinterface extends State<Mapsinterface> {
   bool _isrouteshown = true; //for toggling polylines appearance
 
   LatLng userLocation = const LatLng(10.298333, 123.893366);
+  bool _showUserLocation = false;
   StreamSubscription<Position>?
       positionStreamSubscription; //constantly check user position
 
@@ -112,11 +116,12 @@ class _Mapsinterface extends State<Mapsinterface> {
       setState(() {
         userLocation = LatLng(position.latitude, position.longitude);
       });
-      // Use the mapcontroller from the Completer
-      final GoogleMapController controller =
-          await _mapControllerCompleter.future;
-      controller.animateCamera(CameraUpdate.newCameraPosition(
-          CameraPosition(target: userLocation, zoom: 17)));
+      if (_showUserLocation) {
+        final GoogleMapController controller =
+            await _mapControllerCompleter.future;
+        controller.animateCamera(CameraUpdate.newCameraPosition(
+            CameraPosition(target: userLocation, zoom: 17)));
+      }
     });
   }
 
@@ -289,8 +294,8 @@ class _Mapsinterface extends State<Mapsinterface> {
                                 const MinMaxZoomPreference(15, 20),
                             mapType: MapType.normal,
                             myLocationEnabled: true,
-                            initialCameraPosition: const CameraPosition(
-                              target: LatLng(10.3156173, 123.882969),
+                            initialCameraPosition: CameraPosition(
+                              target: widget.initialPosition,
                               zoom: 17,
                             ),
                             zoomControlsEnabled: false,
@@ -370,7 +375,9 @@ class _Mapsinterface extends State<Mapsinterface> {
                         foregroundColor: const Color.fromARGB(255, 0, 0, 0),
                         backgroundColor: secondaryColor,
                         onPressed: () async {
-                          // Use the mapcontroller from the Completer
+                          setState(() {
+                            _showUserLocation = true;
+                          });
                           final GoogleMapController controller =
                               await _mapControllerCompleter.future;
                           controller.animateCamera(
