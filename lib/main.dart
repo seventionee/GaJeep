@@ -6,6 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'pages/home.dart';
 import 'package:provider/provider.dart';
 import 'providers/jeeps_location.dart';
+import 'dynamic_pages/route_details_screen.dart';
 
 //STARTING THE FLUTTER APP
 void main() async {
@@ -52,6 +53,8 @@ class MyApp extends StatelessWidget {
         LearnMorePage.routeName: (context) => const LearnMorePage(),
         Mapsinterface.routeName: (context) => const Mapsinterface(),
         RoutesDirectory.routeName: (context) => const RoutesDirectory(),
+        RouteDetails.routeName: (context) =>
+            const RouteDetails(routeNumber: ''),
       },
     );
   }

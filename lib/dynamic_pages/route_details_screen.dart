@@ -6,7 +6,7 @@ import '../component/constants.dart';
 
 class RouteDetails extends StatefulWidget {
   final String routeNumber;
-
+  static const routeName = '/routedetails';
   const RouteDetails({super.key, required this.routeNumber});
 
   @override
@@ -32,6 +32,7 @@ class _RouteDetailsState extends State<RouteDetails> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: primaryColor,
         leading: IconButton(
             onPressed: () {
               Navigator.of(context).pop();
