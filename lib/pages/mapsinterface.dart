@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:math';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
 import 'package:geolocator/geolocator.dart';
@@ -29,7 +30,7 @@ class _Mapsinterface extends State<Mapsinterface> {
       Completer(); //for controlling google map interface
   Set<Polyline> mappolylines = {}; //for polylines
   bool _isrouteshown = true; //for toggling polylines appearance
-
+  bool _firstLoad = true;
   LatLng userLocation = const LatLng(10.298333, 123.893366);
   bool _showUserLocation = false;
   StreamSubscription<Position>?
@@ -38,6 +39,48 @@ class _Mapsinterface extends State<Mapsinterface> {
   //for maps style
   Future<String> getJsonFile(String path) async {
     return await rootBundle.loadString(path);
+  }
+
+  Future<void> animateToUserLocation(GoogleMapController controller) async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await controller.animateCamera(CameraUpdate.newCameraPosition(
+        CameraPosition(target: userLocation, zoom: 17),
+      ));
+    });
+  }
+
+  Future<void> animateToInitialPosition(GoogleMapController controller) async {
+    if (_firstLoad) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        // Move the camera to the user's location or initial position.
+        LatLng target =
+            _showUserLocation ? userLocation : widget.initialPosition;
+        await controller.moveCamera(CameraUpdate.newCameraPosition(
+          CameraPosition(target: target, zoom: 17),
+        ));
+
+        // Animate the camera from the user's location to the initial position if necessary.
+        if (_showUserLocation) {
+          await controller.animateCamera(
+            CameraUpdate.newLatLngBounds(
+              LatLngBounds(
+                southwest: LatLng(
+                  min(userLocation.latitude, widget.initialPosition.latitude),
+                  min(userLocation.longitude, widget.initialPosition.longitude),
+                ),
+                northeast: LatLng(
+                  max(userLocation.latitude, widget.initialPosition.latitude),
+                  max(userLocation.longitude, widget.initialPosition.longitude),
+                ),
+              ),
+              100.0, // Add some padding around the locations.
+            ),
+          );
+        }
+
+        _firstLoad = false;
+      });
+    }
   }
 
   @override
@@ -109,18 +152,21 @@ class _Mapsinterface extends State<Mapsinterface> {
     }
 
     positionStreamSubscription = Geolocator.getPositionStream(
-        locationSettings: const LocationSettings(
-      accuracy: LocationAccuracy.best,
-      distanceFilter: 5,
-    )).listen((Position position) async {
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.best,
+        distanceFilter: 5,
+      ),
+    ).listen((Position position) async {
       setState(() {
         userLocation = LatLng(position.latitude, position.longitude);
       });
-      if (_showUserLocation) {
-        final GoogleMapController controller =
-            await _mapControllerCompleter.future;
-        controller.animateCamera(CameraUpdate.newCameraPosition(
-            CameraPosition(target: userLocation, zoom: 17)));
+
+      final GoogleMapController controller =
+          await _mapControllerCompleter.future;
+
+      if (_firstLoad) {
+        await animateToUserLocation(controller);
+        _firstLoad = false;
       }
     });
   }
@@ -295,7 +341,9 @@ class _Mapsinterface extends State<Mapsinterface> {
                             mapType: MapType.normal,
                             myLocationEnabled: true,
                             initialCameraPosition: CameraPosition(
-                              target: widget.initialPosition,
+                              target: _firstLoad
+                                  ? userLocation
+                                  : widget.initialPosition,
                               zoom: 17,
                             ),
                             zoomControlsEnabled: false,

@@ -171,7 +171,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     Navigator.pushNamed(
                       context,
                       Mapsinterface.routeName,
-                      arguments: LatLng(10.3156173, 123.882969),
+                      arguments: const LatLng(10.3156173, 123.882969),
                     );
                   },
                 ),
