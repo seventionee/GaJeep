@@ -6,6 +6,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'pages/home.dart';
 import 'package:provider/provider.dart';
 import 'providers/jeeps_location.dart';
+import 'dynamic_pages/route_details_screen.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 //STARTING THE FLUTTER APP
 void main() async {
@@ -48,10 +50,27 @@ class MyApp extends StatelessWidget {
         ),
       ),
       home: const SplashScreen(), // set SplashScreen as the initial screen
-      routes: {
-        LearnMorePage.routeName: (context) => const LearnMorePage(),
-        Mapsinterface.routeName: (context) => const Mapsinterface(),
-        RoutesDirectory.routeName: (context) => const RoutesDirectory(),
+      onGenerateRoute: (RouteSettings settings) {
+        switch (settings.name) {
+          case LearnMorePage.routeName:
+            return MaterialPageRoute(
+                builder: (context) => const LearnMorePage());
+          case Mapsinterface.routeName:
+            final LatLng initialPosition = settings.arguments as LatLng;
+            return MaterialPageRoute(
+                builder: (context) =>
+                    Mapsinterface(initialPosition: initialPosition));
+          case RoutesDirectory.routeName:
+            return MaterialPageRoute(
+                builder: (context) => const RoutesDirectory());
+          case RouteDetails.routeName:
+            final String routeNumber = settings.arguments as String;
+            return MaterialPageRoute(
+                builder: (context) => const RouteDetails(routeNumber: ''));
+          default:
+            return MaterialPageRoute(
+                builder: (context) => const SplashScreen());
+        }
       },
     );
   }

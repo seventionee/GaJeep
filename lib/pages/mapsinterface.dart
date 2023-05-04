@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:math';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
 import 'package:geolocator/geolocator.dart';
@@ -16,7 +17,10 @@ import 'routes_directory.dart';
 // ignore: use_key_in_widget_constructors
 class Mapsinterface extends StatefulWidget {
   static const routeName = '/mapsinterface';
-  const Mapsinterface({Key? key}) : super(key: key);
+  final LatLng initialPosition;
+
+  const Mapsinterface({Key? key, required this.initialPosition})
+      : super(key: key);
   @override
   createState() => _Mapsinterface();
 }
@@ -26,14 +30,57 @@ class _Mapsinterface extends State<Mapsinterface> {
       Completer(); //for controlling google map interface
   Set<Polyline> mappolylines = {}; //for polylines
   bool _isrouteshown = true; //for toggling polylines appearance
-
+  bool _firstLoad = true;
   LatLng userLocation = const LatLng(10.298333, 123.893366);
+  bool _showUserLocation = false;
   StreamSubscription<Position>?
       positionStreamSubscription; //constantly check user position
 
   //for maps style
   Future<String> getJsonFile(String path) async {
     return await rootBundle.loadString(path);
+  }
+
+  Future<void> animateToUserLocation(GoogleMapController controller) async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await controller.animateCamera(CameraUpdate.newCameraPosition(
+        CameraPosition(target: userLocation, zoom: 17),
+      ));
+    });
+  }
+
+  Future<void> animateToInitialPosition(GoogleMapController controller) async {
+    if (_firstLoad) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        // Move the camera to the user's location or initial position.
+        LatLng target =
+            _showUserLocation ? userLocation : widget.initialPosition;
+        await controller.moveCamera(CameraUpdate.newCameraPosition(
+          CameraPosition(target: target, zoom: 17),
+        ));
+
+        // Animate the camera from the user's location to the initial position if necessary.
+        if (_showUserLocation) {
+          await controller.animateCamera(
+            CameraUpdate.newLatLngBounds(
+              LatLngBounds(
+                southwest: LatLng(
+                  min(userLocation.latitude, widget.initialPosition.latitude),
+                  min(userLocation.longitude, widget.initialPosition.longitude),
+                ),
+                northeast: LatLng(
+                  max(userLocation.latitude, widget.initialPosition.latitude),
+                  max(userLocation.longitude, widget.initialPosition.longitude),
+                ),
+              ),
+              100.0, // Add some padding around the locations.
+            ),
+          );
+        }
+
+        _firstLoad = false;
+      });
+    }
   }
 
   @override
@@ -105,18 +152,22 @@ class _Mapsinterface extends State<Mapsinterface> {
     }
 
     positionStreamSubscription = Geolocator.getPositionStream(
-        locationSettings: const LocationSettings(
-      accuracy: LocationAccuracy.best,
-      distanceFilter: 5,
-    )).listen((Position position) async {
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.best,
+        distanceFilter: 5,
+      ),
+    ).listen((Position position) async {
       setState(() {
         userLocation = LatLng(position.latitude, position.longitude);
       });
-      // Use the mapcontroller from the Completer
+
       final GoogleMapController controller =
           await _mapControllerCompleter.future;
-      controller.animateCamera(CameraUpdate.newCameraPosition(
-          CameraPosition(target: userLocation, zoom: 17)));
+
+      if (_firstLoad) {
+        await animateToUserLocation(controller);
+        _firstLoad = false;
+      }
     });
   }
 
@@ -134,230 +185,264 @@ class _Mapsinterface extends State<Mapsinterface> {
         future: getJsonFile('asset/mapstyle.json'),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
-            return Container();
+            return const SizedBox.shrink();
           }
-          return MaterialApp(
-            home: Scaffold(
-              //MENU
-              drawer: Drawer(
-                child: ListView(
-                  padding: EdgeInsets.zero,
-                  //MENU
-                  children: <Widget>[
-                    //MENU HEADER
-                    const DrawerHeader(
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: AssetImage(
-                                'asset/drawerheadernobackground.png'),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        child: null),
-                    //ROUTE DIRECTORY
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: const Color.fromARGB(255, 0, 0, 0),
-                            width: 1.0,
-                          ),
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(25.0)),
-                          color: primaryColor,
-                        ),
-                        child: ListTile(
-                          title: const Text(
-                            'Route Directory',
-                            style: TextStyle(
-                                fontFamily: 'Epilogue', //font style
-                                fontWeight: FontWeight.w400,
-                                fontSize: 20.0,
-                                color: Colors.black),
-                          ),
-                          tileColor: backgroundColor,
-                          leading: const Icon(
-                              Icons.directions_transit_filled_sharp,
-                              color: Colors.black),
-                          onTap: () {
-                            Navigator.of(context)
-                                .pushNamed(RoutesDirectory.routeName);
-                          },
-                        ),
-                      ),
-                    ),
-                    //FARE CALCULATOR
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: const Color.fromARGB(255, 0, 0, 0),
-                            width: 1.0,
-                          ),
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(25.0)),
-                          color: primaryColor,
-                        ),
-                        child: ListTile(
-                          title: const Text(
-                            'Fare Calculator',
-                            style: TextStyle(
-                              fontFamily: 'Epilogue', //font style
-                              fontWeight: FontWeight.w400,
-                              fontSize: 20.0,
-                              color: Colors.black,
-                            ),
-                          ),
-                          leading: const Icon(Icons.calculate_rounded,
-                              color: Colors.black),
-                          onTap: () {},
-                        ),
-                      ),
-                    ),
-                    //ABOUT GAJEEP
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: const Color.fromARGB(255, 0, 0, 0),
-                            width: 1.0,
-                          ),
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(25.0)),
-                          color: primaryColor,
-                        ),
-                        child: ListTile(
-                          title: const Text(
-                            'About GaJeep',
-                            style: TextStyle(
-                              fontFamily: 'Epilogue', //font style
-                              fontWeight: FontWeight.w400,
-                              fontSize: 20.0,
-                              color: Colors.black,
-                            ),
-                          ),
-                          leading: const Icon(Icons.info_outline_rounded,
-                              color: Colors.black),
-                          onTap: () {
-                            Navigator.of(context).pushNamed(
-                              LearnMorePage.routeName,
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              //END OF MENU DRAWER
 
-              //REST OF INTERFACE
-              body: Builder(builder: (context) {
-                return Stack(
-                  children: [
-                    //GOOGLE MAPS
-                    Consumer<VehicleLocationProvider>(
-                      builder: (context, vehicleLocationProvider, child) {
-                        debugPrint(
-                            'Selected marker: ${vehicleLocationProvider.selectedMarkerId}'); // Add this print statement
-                        debugPrint(
-                            'Selected jeep route: ${vehicleLocationProvider.selectedJeepRoute}'); // Add this print statement
-                        debugPrint(
-                            'Selected capacity status: ${vehicleLocationProvider.selectedCapacityStatus}'); // Add this print statement
-                        return Stack(
-                          children: [
-                            GoogleMap(
-                              onTap: (LatLng position) {
-                                debugPrint('TAPPED ON GOOGLE MAPS');
-                                vehicleLocationProvider.deselectMarker();
-                              },
-                              onCameraMove: (position) {
-                                onCameraMoveHandler(
-                                    position, vehicleLocationProvider);
-                              },
-                              onMapCreated:
-                                  (GoogleMapController controller) async {
-                                _mapControllerCompleter.complete(controller);
-                                updateMapController(context, controller);
-                                controller.setMapStyle(snapshot.data!);
-                              },
-                              compassEnabled: false,
-                              minMaxZoomPreference:
-                                  const MinMaxZoomPreference(15, 20),
-                              mapType: MapType.normal,
-                              myLocationEnabled: true,
-                              initialCameraPosition: const CameraPosition(
-                                target: LatLng(10.3156173, 123.882969),
-                                zoom: 17,
-                              ),
-                              zoomControlsEnabled: false,
-                              myLocationButtonEnabled: false,
-                              mapToolbarEnabled: false,
-                              polylines: _isrouteshown ? mappolylines : {},
-                              markers: vehicleLocationProvider
-                                  .vehicleMarkers.values
-                                  .toSet(),
+          return Scaffold(
+            //MENU
+            drawer: Drawer(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                //MENU
+                children: <Widget>[
+                  //MENU HEADER
+                  const DrawerHeader(
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image:
+                              AssetImage('asset/drawerheadernobackground.png'),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      child: null),
+                  //ROUTE DIRECTORY
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: const Color.fromARGB(255, 0, 0, 0),
+                          width: 1.0,
+                        ),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(25.0)),
+                        color: primaryColor,
+                      ),
+                      child: ListTile(
+                        title: const Text(
+                          'Route Directory',
+                          style: TextStyle(
+                              fontFamily: 'Epilogue', //font style
+                              fontWeight: FontWeight.w400,
+                              fontSize: 20.0,
+                              color: Colors.black),
+                        ),
+                        tileColor: backgroundColor,
+                        leading: const Icon(
+                            Icons.directions_transit_filled_sharp,
+                            color: Colors.black),
+                        onTap: () {
+                          Navigator.of(context)
+                              .pushNamed(RoutesDirectory.routeName);
+                        },
+                      ),
+                    ),
+                  ),
+                  //FARE CALCULATOR
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: const Color.fromARGB(255, 0, 0, 0),
+                          width: 1.0,
+                        ),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(25.0)),
+                        color: primaryColor,
+                      ),
+                      child: ListTile(
+                        title: const Text(
+                          'Fare Calculator',
+                          style: TextStyle(
+                            fontFamily: 'Epilogue', //font style
+                            fontWeight: FontWeight.w400,
+                            fontSize: 20.0,
+                            color: Colors.black,
+                          ),
+                        ),
+                        leading: const Icon(Icons.calculate_rounded,
+                            color: Colors.black),
+                        onTap: () {},
+                      ),
+                    ),
+                  ),
+                  //ABOUT GAJEEP
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: const Color.fromARGB(255, 0, 0, 0),
+                          width: 1.0,
+                        ),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(25.0)),
+                        color: primaryColor,
+                      ),
+                      child: ListTile(
+                        title: const Text(
+                          'About GaJeep',
+                          style: TextStyle(
+                            fontFamily: 'Epilogue', //font style
+                            fontWeight: FontWeight.w400,
+                            fontSize: 20.0,
+                            color: Colors.black,
+                          ),
+                        ),
+                        leading: const Icon(Icons.info_outline_rounded,
+                            color: Colors.black),
+                        onTap: () {
+                          Navigator.of(context).pushNamed(
+                            LearnMorePage.routeName,
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            //END OF MENU DRAWER
+
+            //REST OF INTERFACE
+            body: Builder(builder: (context) {
+              return Stack(
+                children: [
+                  //GOOGLE MAPS
+                  Consumer<VehicleLocationProvider>(
+                    builder: (context, vehicleLocationProvider, child) {
+                      debugPrint(
+                          'Selected marker: ${vehicleLocationProvider.selectedMarkerId}'); // Add this print statement
+                      debugPrint(
+                          'Selected jeep route: ${vehicleLocationProvider.selectedJeepRoute}'); // Add this print statement
+                      debugPrint(
+                          'Selected capacity status: ${vehicleLocationProvider.selectedCapacityStatus}'); // Add this print statement
+                      return Stack(
+                        children: [
+                          GoogleMap(
+                            onTap: (LatLng position) {
+                              debugPrint('TAPPED ON GOOGLE MAPS');
+                              vehicleLocationProvider.deselectMarker();
+                            },
+                            onCameraMove: (position) {
+                              onCameraMoveHandler(
+                                  position, vehicleLocationProvider);
+                            },
+                            onMapCreated:
+                                (GoogleMapController controller) async {
+                              _mapControllerCompleter.complete(controller);
+                              updateMapController(context, controller);
+                              controller.setMapStyle(snapshot.data!);
+                            },
+                            compassEnabled: false,
+                            minMaxZoomPreference:
+                                const MinMaxZoomPreference(15, 20),
+                            mapType: MapType.normal,
+                            myLocationEnabled: true,
+                            initialCameraPosition: CameraPosition(
+                              target: _firstLoad
+                                  ? userLocation
+                                  : widget.initialPosition,
+                              zoom: 17,
                             ),
+                            zoomControlsEnabled: false,
+                            myLocationButtonEnabled: false,
+                            mapToolbarEnabled: false,
+                            polylines: _isrouteshown ? mappolylines : {},
+                            markers: vehicleLocationProvider
+                                .vehicleMarkers.values
+                                .toSet(),
+                          ),
+                          if (vehicleLocationProvider.selectedMarkerId != null)
                             if (vehicleLocationProvider.selectedMarkerId !=
-                                null)
-                              if (vehicleLocationProvider.selectedMarkerId !=
-                                      null &&
-                                  !vehicleLocationProvider.isUpdatingWidget)
-                                Align(
-                                  alignment: Alignment.center,
-                                  child: Visibility(
-                                    visible: vehicleLocationProvider
-                                                .selectedMarkerId !=
-                                            null &&
-                                        !vehicleLocationProvider
-                                            .isUpdatingWidget,
-                                    child: VehicleInfoWidget(
-                                      jeepRoute: vehicleLocationProvider
-                                              .selectedJeepRoute ??
-                                          '',
-                                      capacityStatus: vehicleLocationProvider
-                                              .selectedCapacityStatus ??
-                                          '',
-                                    ),
+                                    null &&
+                                !vehicleLocationProvider.isUpdatingWidget)
+                              Align(
+                                alignment: Alignment.center,
+                                child: Visibility(
+                                  visible: vehicleLocationProvider
+                                              .selectedMarkerId !=
+                                          null &&
+                                      !vehicleLocationProvider.isUpdatingWidget,
+                                  child: VehicleInfoWidget(
+                                    jeepRoute: vehicleLocationProvider
+                                            .selectedJeepRoute ??
+                                        '',
+                                    capacityStatus: vehicleLocationProvider
+                                            .selectedCapacityStatus ??
+                                        '',
                                   ),
                                 ),
-                          ],
-                        );
-                      },
-                    ),
+                              ),
+                        ],
+                      );
+                    },
+                  ),
 
-                    //MENU BUTTON
-                    Positioned(
-                        bottom: 90,
-                        right: 16,
-                        child: Container(
-                          //style for menu button
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Colors.black, // set the border color
-                              width: 1.0, // set the border width
-                            ),
-                            borderRadius: BorderRadius.circular(
-                                50.0), // set the border radius
-                          ),
-                          child: FloatingActionButton(
-                            heroTag: null,
-                            foregroundColor: const Color.fromARGB(255, 0, 0, 0),
-                            backgroundColor: primaryColor,
-                            onPressed: () {
-                              Scaffold.of(context).openDrawer();
-                            },
-                            child: const Icon(Icons.menu_rounded),
-                          ),
-                        )),
-
-                    //SHOW USER LOCATION FAB
-                    Positioned(
-                      bottom: 16,
+                  //MENU BUTTON
+                  Positioned(
+                      bottom: 90,
                       right: 16,
+                      child: Container(
+                        //style for menu button
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Colors.black, // set the border color
+                            width: 1.0, // set the border width
+                          ),
+                          borderRadius: BorderRadius.circular(
+                              50.0), // set the border radius
+                        ),
+                        child: FloatingActionButton(
+                          heroTag: null,
+                          foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+                          backgroundColor: primaryColor,
+                          onPressed: () {
+                            Scaffold.of(context).openDrawer();
+                          },
+                          child: const Icon(Icons.menu_rounded),
+                        ),
+                      )),
+
+                  //SHOW USER LOCATION FAB
+                  Positioned(
+                    bottom: 16,
+                    right: 16,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.black, // set the border color
+                          width: 1.0, // set the border width
+                        ),
+                        borderRadius: BorderRadius.circular(
+                            50.0), // set the border radius
+                      ),
+                      child: FloatingActionButton(
+                        heroTag: null,
+                        foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+                        backgroundColor: secondaryColor,
+                        onPressed: () async {
+                          setState(() {
+                            _showUserLocation = true;
+                          });
+                          final GoogleMapController controller =
+                              await _mapControllerCompleter.future;
+                          controller.animateCamera(
+                            CameraUpdate.newCameraPosition(
+                              CameraPosition(target: userLocation, zoom: 17),
+                            ),
+                          );
+                        },
+                        child: const Icon(Icons.location_searching),
+                      ),
+                    ),
+                  ),
+
+                  //TOGGLE DIRECTIONS APPERANCE FAB
+                  Positioned(
+                      bottom: 16,
+                      left: 16,
                       child: Container(
                         decoration: BoxDecoration(
                           border: Border.all(
@@ -371,82 +456,48 @@ class _Mapsinterface extends State<Mapsinterface> {
                           heroTag: null,
                           foregroundColor: const Color.fromARGB(255, 0, 0, 0),
                           backgroundColor: secondaryColor,
-                          onPressed: () async {
-                            // Use the mapcontroller from the Completer
-                            final GoogleMapController controller =
-                                await _mapControllerCompleter.future;
-                            controller.animateCamera(
-                              CameraUpdate.newCameraPosition(
-                                CameraPosition(target: userLocation, zoom: 17),
-                              ),
-                            );
-                          },
-                          child: const Icon(Icons.location_searching),
+                          onPressed: _toggleroutesvisibility,
+                          child: Icon(_isrouteshown
+                              ? Icons.directions
+                              : Icons.directions_off),
                         ),
-                      ),
-                    ),
+                      )),
 
-                    //TOGGLE DIRECTIONS APPERANCE FAB
-                    Positioned(
-                        bottom: 16,
-                        left: 16,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Colors.black, // set the border color
-                              width: 1.0, // set the border width
-                            ),
-                            borderRadius: BorderRadius.circular(
-                                50.0), // set the border radius
-                          ),
-                          child: FloatingActionButton(
-                            heroTag: null,
-                            foregroundColor: const Color.fromARGB(255, 0, 0, 0),
-                            backgroundColor: secondaryColor,
-                            onPressed: _toggleroutesvisibility,
-                            child: Icon(_isrouteshown
-                                ? Icons.directions
-                                : Icons.directions_off),
-                          ),
-                        )),
-
-                    //SEARCH MAP WIDGET
-                    Positioned(
-                      top: 50,
-                      left: 16,
-                      right: 16,
-                      child: SearchMapPlaceWidget(
-                        apiKey: 'AIzaSyBOS4cS8wIYV2tRBhtf5O2hnIZ1Iley9Jc',
-                        language: 'en',
-                        bgColor: Colors.white,
-                        location: userLocation,
-                        radius: 14697,
-                        strictBounds: true,
-                        iconColor: Colors.black,
-                        textColor: Colors.black,
-                        placeholder: 'Where do you want to go to?',
-                        onSelected: (Place place) async {
-                          final geolocation = await place.geolocation;
-                          final cameraUpdate =
-                              CameraUpdate.newLatLng(geolocation!.coordinates!);
-                          // Use the mapcontroller from the Completer
-                          final GoogleMapController controller =
-                              await _mapControllerCompleter.future;
-                          controller.animateCamera(cameraUpdate);
-                        },
-                      ),
+                  //SEARCH MAP WIDGET
+                  Positioned(
+                    top: 50,
+                    left: 16,
+                    right: 16,
+                    child: SearchMapPlaceWidget(
+                      apiKey: 'AIzaSyBOS4cS8wIYV2tRBhtf5O2hnIZ1Iley9Jc',
+                      language: 'en',
+                      bgColor: Colors.white,
+                      location: userLocation,
+                      radius: 14697,
+                      strictBounds: true,
+                      iconColor: Colors.black,
+                      textColor: Colors.black,
+                      placeholder: 'Where do you want to go to?',
+                      onSelected: (Place place) async {
+                        final geolocation = await place.geolocation;
+                        final cameraUpdate =
+                            CameraUpdate.newLatLng(geolocation!.coordinates!);
+                        // Use the mapcontroller from the Completer
+                        final GoogleMapController controller =
+                            await _mapControllerCompleter.future;
+                        controller.animateCamera(cameraUpdate);
+                      },
                     ),
-                  ],
-                );
-              }),
-            ),
+                  ),
+                ],
+              );
+            }),
           );
         },
       ),
     );
   }
 
-//PROMPT TO FORCE USER TO EXIT AFTER BACK BUTTON IS PRESSED
   Future<bool> _onBackPressed() async {
     showDialog(
       context: context,

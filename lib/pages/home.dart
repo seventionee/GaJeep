@@ -7,6 +7,7 @@ import '../providers/request_location_permission.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../component/constants.dart';
 import '../providers/splashscreenwithcallback.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -167,8 +168,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 builder: (BuildContext context) => SplashScreenWithCallback(
                   onComplete: () {
                     Navigator.pop(context); // Close the splash screen dialog
-                    Navigator.of(context).pushNamed(
+                    Navigator.pushNamed(
+                      context,
                       Mapsinterface.routeName,
+                      arguments: const LatLng(10.3156173, 123.882969),
                     );
                   },
                 ),
