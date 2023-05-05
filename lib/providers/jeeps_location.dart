@@ -76,10 +76,17 @@ class VehicleLocationProvider with ChangeNotifier {
       GeoPoint location = snapshot['Location'];
       String jeepRoute = snapshot['Route Number'];
       String capacityStatus = snapshot['Capacity'];
+      double bearing = snapshot['Bearing'] is double
+          ? snapshot['Bearing']
+          : double.parse(
+              snapshot['Bearing'].toString()); // Handle different data types
+
+      debugPrint('Bearing for $jeepRoute: $bearing');
       LatLng position = LatLng(location.latitude, location.longitude);
       Marker marker = Marker(
         markerId: markerId,
         position: position,
+        rotation: bearing,
         onTap: () {
           _selectedMarkerId = markerId;
           _selectedJeepRoute = jeepRoute;
