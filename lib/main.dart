@@ -7,6 +7,7 @@ import 'pages/home.dart';
 import 'package:provider/provider.dart';
 import 'providers/jeeps_location.dart';
 import 'dynamic_pages/route_details_screen.dart';
+import 'dynamic_pages/route_maps_interface.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 //STARTING THE FLUTTER APP
@@ -67,6 +68,14 @@ class MyApp extends StatelessWidget {
             final String routeNumber = settings.arguments as String;
             return MaterialPageRoute(
                 builder: (context) => const RouteDetails(routeNumber: ''));
+          case RouteMapInterface.routeName:
+            final LatLng initialPosition = settings.arguments as LatLng;
+            final String selectedRoute;
+            return MaterialPageRoute(
+                builder: (context) => RouteMapInterface(
+                      initialPosition: initialPosition,
+                      selectedRoute: '',
+                    ));
           default:
             return MaterialPageRoute(
                 builder: (context) => const SplashScreen());

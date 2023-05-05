@@ -7,32 +7,32 @@ import 'package:geolocator/geolocator.dart';
 import '../providers/request_location_permission.dart';
 import 'package:search_map_place_updated/search_map_place_updated.dart';
 import '../component/constants.dart';
-import 'learnmore.dart';
+import '../pages/learnmore.dart';
 import '../providers/polylines_y_markers.dart';
 import '../providers/jeeps_location.dart';
 import 'package:provider/provider.dart';
 import '../providers/jeep_info.dart';
-import 'routes_directory.dart';
+import '../pages/routes_directory.dart';
 
-// ignore: use_key_in_widget_constructors
-class Mapsinterface extends StatefulWidget {
-  static const routeName = '/mapsinterface';
+class RouteMapInterface extends StatefulWidget {
+  static const routeName = '/routemapinterface';
   final LatLng initialPosition;
-
-  const Mapsinterface({Key? key, required this.initialPosition})
-      : super(key: key);
+  final String selectedRoute;
+  const RouteMapInterface(
+      {super.key, required this.selectedRoute, required this.initialPosition});
   @override
-  createState() => _Mapsinterface();
+  createState() => _RouteMapInterface();
 }
 
-class _Mapsinterface extends State<Mapsinterface> {
+class _RouteMapInterface extends State<RouteMapInterface> {
   final Completer<GoogleMapController> _mapControllerCompleter =
       Completer(); //for controlling google map interface
   Set<Polyline> mappolylines = {}; //for polylines
   bool _isrouteshown = true; //for toggling polylines appearance
   bool _firstLoad = true;
-  LatLng userLocation = const LatLng(10.298333, 123.893366);
-  bool _showUserLocation = false;
+  late LatLng userLocation = const LatLng(10.298333, 123.893366);
+  late LatLng initialPosition;
+  final bool _showUserLocation = false;
   StreamSubscription<Position>?
       positionStreamSubscription; //constantly check user position
 
@@ -45,7 +45,7 @@ class _Mapsinterface extends State<Mapsinterface> {
   Future<void> animateToUserLocation(GoogleMapController controller) async {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await controller.animateCamera(CameraUpdate.newCameraPosition(
-        CameraPosition(target: userLocation, zoom: 17),
+        CameraPosition(target: initialPosition, zoom: 17),
       ));
     });
   }
@@ -89,6 +89,7 @@ class _Mapsinterface extends State<Mapsinterface> {
     super.initState();
     requestLocationPermission();
     subscribeUserLocationUpdates();
+    initialPosition = widget.initialPosition;
     getPolylinesFromFirestore(context).then((polylines) {
       setState(() {
         mappolylines = polylines.toSet();
@@ -175,6 +176,7 @@ class _Mapsinterface extends State<Mapsinterface> {
   @override
   void dispose() {
     positionStreamSubscription?.cancel();
+
     super.dispose();
   }
 
@@ -342,7 +344,7 @@ class _Mapsinterface extends State<Mapsinterface> {
                             mapType: MapType.normal,
                             myLocationEnabled: true,
                             initialCameraPosition: CameraPosition(
-                              target: userLocation,
+                              target: widget.initialPosition,
                               zoom: 17,
                             ),
                             zoomControlsEnabled: false,
@@ -422,9 +424,17 @@ class _Mapsinterface extends State<Mapsinterface> {
                         foregroundColor: const Color.fromARGB(255, 0, 0, 0),
                         backgroundColor: secondaryColor,
                         onPressed: () async {
+                          Position position =
+                              await Geolocator.getCurrentPosition(
+                                  desiredAccuracy: LocationAccuracy.high);
+                          LatLng currentLocation =
+                              LatLng(position.latitude, position.longitude);
+
+                          // Update the userLocation variable
                           setState(() {
-                            _showUserLocation = true;
+                            userLocation = currentLocation;
                           });
+
                           final GoogleMapController controller =
                               await _mapControllerCompleter.future;
                           controller.animateCamera(
