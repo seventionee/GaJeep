@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import '../pages/mapsinterface.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../providers/polylinesdrawer.dart';
+import '../providers/polylines_y_markers.dart';
 import '../component/constants.dart';
+import 'route_maps_interface.dart';
 
 class RouteDetails extends StatefulWidget {
   final String routeNumber;
@@ -183,16 +183,20 @@ class _RouteDetailsState extends State<RouteDetails> {
                             color: Colors.black,
                           ),
                         ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => Mapsinterface(
-                                initialPosition: vehicleLocation,
+                        trailing: ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => RouteMapInterface(
+                                  initialPosition: vehicleLocation,
+                                  selectedRoute: routeNumber,
+                                ),
                               ),
-                            ),
-                          );
-                        },
+                            );
+                          },
+                          child: const Text('View Jeep On Map'),
+                        ),
                       );
                     },
                   );
