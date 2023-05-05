@@ -13,6 +13,7 @@ import '../providers/jeeps_location.dart';
 import 'package:provider/provider.dart';
 import '../providers/jeep_info.dart';
 import '../pages/routes_directory.dart';
+import '../pages/mapsinterface.dart';
 
 class RouteMapInterface extends StatefulWidget {
   static const routeName = '/routemapinterface';
@@ -211,6 +212,41 @@ class _RouteMapInterface extends State<RouteMapInterface> {
                         ),
                       ),
                       child: null),
+                  //View All Routes On Map
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: const Color.fromARGB(255, 0, 0, 0),
+                          width: 1.0,
+                        ),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(25.0)),
+                        color: primaryColor,
+                      ),
+                      child: ListTile(
+                        title: const Text(
+                          'View All Routes',
+                          style: TextStyle(
+                              fontFamily: 'Epilogue', //font style
+                              fontWeight: FontWeight.w400,
+                              fontSize: 20.0,
+                              color: Colors.black),
+                        ),
+                        tileColor: backgroundColor,
+                        leading:
+                            const Icon(Icons.map_outlined, color: Colors.black),
+                        onTap: () {
+                          Navigator.pushReplacementNamed(
+                            context,
+                            Mapsinterface.routeName,
+                            arguments: widget.initialPosition,
+                          );
+                        },
+                      ),
+                    ),
+                  ),
                   //ROUTE DIRECTORY
                   Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -348,7 +384,7 @@ class _RouteMapInterface extends State<RouteMapInterface> {
                             myLocationEnabled: true,
                             initialCameraPosition: CameraPosition(
                               target: widget.initialPosition,
-                              zoom: 20,
+                              zoom: 15,
                             ),
                             zoomControlsEnabled: false,
                             myLocationButtonEnabled: false,

@@ -342,7 +342,7 @@ class _Mapsinterface extends State<Mapsinterface> {
                             mapType: MapType.normal,
                             myLocationEnabled: true,
                             initialCameraPosition: CameraPosition(
-                              target: userLocation,
+                              target: widget.initialPosition,
                               zoom: 17,
                             ),
                             zoomControlsEnabled: false,
@@ -422,9 +422,17 @@ class _Mapsinterface extends State<Mapsinterface> {
                         foregroundColor: const Color.fromARGB(255, 0, 0, 0),
                         backgroundColor: secondaryColor,
                         onPressed: () async {
+                          Position position =
+                              await Geolocator.getCurrentPosition(
+                                  desiredAccuracy: LocationAccuracy.high);
+                          LatLng currentLocation =
+                              LatLng(position.latitude, position.longitude);
+
+                          // Update the userLocation variable
                           setState(() {
-                            _showUserLocation = true;
+                            userLocation = currentLocation;
                           });
+
                           final GoogleMapController controller =
                               await _mapControllerCompleter.future;
                           controller.animateCamera(
