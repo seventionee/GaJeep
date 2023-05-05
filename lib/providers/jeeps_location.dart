@@ -13,8 +13,13 @@ class VehicleInfo {
 class VehicleLocationProvider with ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   GoogleMapController? _mapController;
-
+  String? _selectedRoute;
   MarkerId? _lockedMarkerId;
+  String? _routeFilter;
+  void setSelectedRoute(String? route) {
+    _selectedRoute = route;
+    notifyListeners();
+  }
 
   void deselectMarker() {
     _selectedMarkerId = null;
@@ -58,7 +63,8 @@ class VehicleLocationProvider with ChangeNotifier {
   String? get selectedJeepRoute => _selectedJeepRoute;
   String? get selectedCapacityStatus => _selectedCapacityStatus;
 
-  VehicleLocationProvider() {
+  VehicleLocationProvider({String? routeFilter}) {
+    _routeFilter = routeFilter;
     _initVehicleMarkers();
   }
 
@@ -72,7 +78,10 @@ class VehicleLocationProvider with ChangeNotifier {
 
   void _updateMarker(DocumentSnapshot snapshot) async {
     MarkerId markerId = MarkerId(snapshot.id);
-    if (snapshot.exists && snapshot['Status'] == 'Active') {
+    debugPrint('CHECKING FOR SELECTEDROUTE TO DISPLAY $_selectedRoute');
+    if (snapshot.exists &&
+        snapshot['Status'] == 'Active' &&
+        (_routeFilter == null || snapshot['Route Number'] == _routeFilter)) {
       GeoPoint location = snapshot['Location'];
       String jeepRoute = snapshot['Route Number'];
       String capacityStatus = snapshot['Capacity'];
