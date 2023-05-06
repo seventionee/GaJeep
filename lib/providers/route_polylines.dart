@@ -294,8 +294,8 @@ Future<List<Polyline>> getPolylineforCalculator(BuildContext context,
   for (QueryDocumentSnapshot doc in querySnapshot.docs) {
     if ((doc['Route Number']) == selectedRoute) {
       List<GeoPoint> geoPoints = useRoutePoints1
-          ? List.from(doc['Route Points 1'])
-          : List.from(doc['Route Points 2']);
+          ? List.from(doc['Route Points 2'])
+          : List.from(doc['Route Points 1']);
       String routeNumber = (doc['Route Number']);
       debugPrint('Polyline for route number $routeNumber');
       List<LatLng> latLngPoints = geoPoints
