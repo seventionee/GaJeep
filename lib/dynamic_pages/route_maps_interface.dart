@@ -413,6 +413,29 @@ class _RouteMapInterface extends State<RouteMapInterface> {
                                   .vehicleMarkers.values
                                   .toSet(),
                             ),
+                            if (vehicleLocationProvider.selectedMarkerId !=
+                                null)
+                              if (vehicleLocationProvider.selectedMarkerId !=
+                                      null &&
+                                  !vehicleLocationProvider.isUpdatingWidget)
+                                Align(
+                                  alignment: Alignment.center,
+                                  child: Visibility(
+                                    visible: vehicleLocationProvider
+                                                .selectedMarkerId !=
+                                            null &&
+                                        !vehicleLocationProvider
+                                            .isUpdatingWidget,
+                                    child: VehicleInfoWidget(
+                                      jeepRoute: vehicleLocationProvider
+                                              .selectedJeepRoute ??
+                                          '',
+                                      capacityStatus: vehicleLocationProvider
+                                              .selectedCapacityStatus ??
+                                          '',
+                                    ),
+                                  ),
+                                ),
                           ],
                         );
                       },
