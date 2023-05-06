@@ -32,7 +32,7 @@ class _Mapsinterface extends State<Mapsinterface> {
   bool _isrouteshown = true; //for toggling polylines appearance
   bool _firstLoad = true;
   LatLng userLocation = const LatLng(10.298333, 123.893366);
-  bool _showUserLocation = false;
+  final bool _showUserLocation = false;
   StreamSubscription<Position>?
       positionStreamSubscription; //constantly check user position
 
@@ -89,6 +89,7 @@ class _Mapsinterface extends State<Mapsinterface> {
     super.initState();
     requestLocationPermission();
     subscribeUserLocationUpdates();
+
     getPolylinesFromFirestore(context).then((polylines) {
       setState(() {
         mappolylines = polylines.toSet();
@@ -342,8 +343,8 @@ class _Mapsinterface extends State<Mapsinterface> {
                             mapType: MapType.normal,
                             myLocationEnabled: true,
                             initialCameraPosition: CameraPosition(
-                              target: userLocation,
-                              zoom: 17,
+                              target: widget.initialPosition,
+                              zoom: 15,
                             ),
                             zoomControlsEnabled: false,
                             myLocationButtonEnabled: false,
@@ -422,9 +423,17 @@ class _Mapsinterface extends State<Mapsinterface> {
                         foregroundColor: const Color.fromARGB(255, 0, 0, 0),
                         backgroundColor: secondaryColor,
                         onPressed: () async {
+                          Position position =
+                              await Geolocator.getCurrentPosition(
+                                  desiredAccuracy: LocationAccuracy.high);
+                          LatLng currentLocation =
+                              LatLng(position.latitude, position.longitude);
+
+                          // Update the userLocation variable
                           setState(() {
-                            _showUserLocation = true;
+                            userLocation = currentLocation;
                           });
+
                           final GoogleMapController controller =
                               await _mapControllerCompleter.future;
                           controller.animateCamera(

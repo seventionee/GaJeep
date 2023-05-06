@@ -16,7 +16,7 @@ class RouteDetails extends StatefulWidget {
 
 class _RouteDetailsState extends State<RouteDetails> {
   late Future<DocumentSnapshot> _routeDocFuture;
-
+  late LatLng centralPoint;
   @override
   void initState() {
     super.initState();
@@ -64,7 +64,10 @@ class _RouteDetailsState extends State<RouteDetails> {
           if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
-
+          GeoPoint centralGeoPoint = snapshot.data!['Central Point'];
+          LatLng routecentralPoint =
+              LatLng(centralGeoPoint.latitude, centralGeoPoint.longitude);
+          centralPoint = routecentralPoint;
           String routeNumber = snapshot.data!['Route Number'];
           String routeDescription = snapshot.data!['Route Description'];
 
@@ -125,6 +128,22 @@ class _RouteDetailsState extends State<RouteDetails> {
                   },
                 ),
               ),
+              ListTile(
+                title: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => RouteMapInterface(
+                          initialPosition: centralPoint,
+                          selectedRoute: routeNumber,
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('View Route On Map'),
+                ),
+              ),
               const ListTile(
                 title: Text(
                   'List of Active Vehicles',
@@ -150,56 +169,69 @@ class _RouteDetailsState extends State<RouteDetails> {
                   if (activeVehiclesListSnapshot.hasError) {
                     return Text('Error: ${activeVehiclesListSnapshot.error}');
                   }
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: activeVehiclesListSnapshot.data!.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      Map<String, dynamic> vehicle =
-                          activeVehiclesListSnapshot.data![index];
-                      String plateNumber = vehicle['plateNumber'];
-                      String capacityStatus = vehicle['capacityStatus'];
-                      GeoPoint vehicleLocationGeoPoint = vehicle['Location'];
-                      LatLng vehicleLocation = LatLng(
-                          vehicleLocationGeoPoint.latitude,
-                          vehicleLocationGeoPoint.longitude);
+                  return activeVehiclesListSnapshot.data!.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'There are currently no active jeepneys for this route.',
+                            style: TextStyle(
+                              fontFamily: 'Epilogue', //font style
+                              fontWeight: FontWeight.w400,
+                              fontSize: 20.0,
+                              color: Colors.black,
+                            ),
+                          ),
+                        )
+                      : ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: activeVehiclesListSnapshot.data!.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            Map<String, dynamic> vehicle =
+                                activeVehiclesListSnapshot.data![index];
+                            String plateNumber = vehicle['plateNumber'];
+                            String capacityStatus = vehicle['capacityStatus'];
+                            GeoPoint vehicleLocationGeoPoint =
+                                vehicle['Location'];
+                            LatLng vehicleLocation = LatLng(
+                                vehicleLocationGeoPoint.latitude,
+                                vehicleLocationGeoPoint.longitude);
 
-                      return ListTile(
-                        title: Text(
-                          'Plate Number: $plateNumber',
-                          style: const TextStyle(
-                            fontFamily: 'Epilogue', //font style
-                            fontWeight: FontWeight.w400,
-                            fontSize: 20.0,
-                            color: Colors.black,
-                          ),
-                        ),
-                        subtitle: Text(
-                          'Capacity Status: $capacityStatus',
-                          style: const TextStyle(
-                            fontFamily: 'Epilogue', //font style
-                            fontWeight: FontWeight.w400,
-                            fontSize: 20.0,
-                            color: Colors.black,
-                          ),
-                        ),
-                        trailing: ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => RouteMapInterface(
-                                  initialPosition: vehicleLocation,
-                                  selectedRoute: routeNumber,
+                            return ListTile(
+                              title: Text(
+                                'Plate Number: $plateNumber',
+                                style: const TextStyle(
+                                  fontFamily: 'Epilogue', //font style
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 20.0,
+                                  color: Colors.black,
                                 ),
+                              ),
+                              subtitle: Text(
+                                'Capacity Status: $capacityStatus',
+                                style: const TextStyle(
+                                  fontFamily: 'Epilogue', //font style
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 20.0,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              trailing: ElevatedButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => RouteMapInterface(
+                                        initialPosition: vehicleLocation,
+                                        selectedRoute: routeNumber,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: const Text('View Jeep On Map'),
                               ),
                             );
                           },
-                          child: const Text('View Jeep On Map'),
-                        ),
-                      );
-                    },
-                  );
+                        );
                 },
               ),
             ],
