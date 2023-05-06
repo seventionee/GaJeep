@@ -200,7 +200,21 @@ class _RouteMapInterface extends State<RouteMapInterface> {
             }
 
             return Scaffold(
-              //MENU
+              appBar: AppBar(
+                backgroundColor: primaryColor,
+                centerTitle: true,
+                automaticallyImplyLeading: false,
+                title: Text(
+                  '${widget.selectedRoute} - Route Map',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontFamily: 'Epilogue', //font style
+                    fontWeight: FontWeight.w400,
+                    fontSize: 20.0,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
               drawer: Drawer(
                 child: ListView(
                   padding: EdgeInsets.zero,
@@ -517,9 +531,32 @@ class _RouteMapInterface extends State<RouteMapInterface> {
                           ),
                         )),
 
+                    //Fare calculator button
+                    Positioned(
+                        bottom: 90,
+                        left: 16,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Colors.black, // set the border color
+                              width: 1.0, // set the border width
+                            ),
+                            borderRadius: BorderRadius.circular(
+                                50.0), // set the border radius
+                          ),
+                          child: FloatingActionButton(
+                            heroTag: null,
+                            foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+                            backgroundColor: primaryColor,
+                            onPressed: _toggleroutesvisibility,
+                            child: const Icon(Icons.calculate_rounded,
+                                color: Colors.black),
+                          ),
+                        )),
+
                     //SEARCH MAP WIDGET
                     Positioned(
-                      top: 50,
+                      top: 10,
                       left: 16,
                       right: 16,
                       child: SearchMapPlaceWidget(
