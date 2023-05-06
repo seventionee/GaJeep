@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../component/constants.dart';
-import 'polylines_y_markers.dart';
+import 'route_polylines.dart';
 import '../dynamic_pages/route_details_screen.dart';
 
 class RouteDetailsModal extends StatefulWidget {

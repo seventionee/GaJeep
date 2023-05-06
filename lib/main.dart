@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'providers/jeeps_location.dart';
 import 'dynamic_pages/route_details_screen.dart';
 import 'dynamic_pages/route_maps_interface.dart';
+import 'dynamic_pages/fare_calculator_map.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 //STARTING THE FLUTTER APP
@@ -72,6 +73,15 @@ class MyApp extends StatelessWidget {
             return MaterialPageRoute(
                 builder: (context) => RouteMapInterface(
                       initialPosition: initialPosition,
+                      selectedRoute: '',
+                    ));
+
+          case FareCalculatorMapInterface.routeName:
+            final LatLng initialcalculatorposition =
+                settings.arguments as LatLng;
+            return MaterialPageRoute(
+                builder: (context) => FareCalculatorMapInterface(
+                      initialcalculatorposition: initialcalculatorposition,
                       selectedRoute: '',
                     ));
           default:

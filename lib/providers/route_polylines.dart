@@ -47,9 +47,11 @@ Future<List<Polyline>> getPolylinesFromFirestore(BuildContext context) async {
   int numPolylines = querySnapshot.docs.length;
   double hueStep = 360 / numPolylines;
 
+  //for ROUTE POINTS 1
   for (QueryDocumentSnapshot doc in querySnapshot.docs) {
-    List<GeoPoint> geoPoints = List.from(doc['Route Points']);
     String routeNumber = (doc['Route Number']);
+    debugPrint('Show polyline $routeNumber');
+    List<GeoPoint> geoPoints = List.from(doc['Route Points 1']);
     String routeDescription = (doc['Route Description']);
     List<LatLng> latLngPoints = geoPoints
         .map((point) => LatLng(point.latitude, point.longitude))
@@ -59,13 +61,67 @@ Future<List<Polyline>> getPolylinesFromFirestore(BuildContext context) async {
     //polyline color auto adjustable from rgb
     ui.Color polylineColor = ui.Color.fromARGB(
       255,
-      HSVColor.fromAHSV(1.0, hueStep * (polylineIdCounter - 1), 1.0, 1.0)
+      HSVColor.fromAHSV(
+              1.0, (hueStep * (polylineIdCounter - 1)) % 360, 1.0, 1.0)
           .toColor()
           .red,
-      HSVColor.fromAHSV(1.0, hueStep * (polylineIdCounter - 1), 1.0, 1.0)
+      HSVColor.fromAHSV(
+              1.0, (hueStep * (polylineIdCounter - 1)) % 360, 1.0, 1.0)
           .toColor()
           .green,
-      HSVColor.fromAHSV(1.0, hueStep * (polylineIdCounter - 1), 1.0, 1.0)
+      HSVColor.fromAHSV(
+              1.0, (hueStep * (polylineIdCounter - 1)) % 360, 1.0, 1.0)
+          .toColor()
+          .blue,
+    );
+
+    Polyline polyline = Polyline(
+        polylineId: PolylineId(polylineIdCounter.toString()),
+        points: latLngPoints,
+        color: polylineColor,
+        width: 3,
+        consumeTapEvents: true,
+        onTap: () {
+          debugPrint('Polyline is TAPPED!');
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return RouteDetailsModal(
+                routeName: routeNumber,
+                routeDescription: routeDescription,
+              );
+            },
+          );
+        });
+
+    polylines.add(polyline);
+    polylineIdCounter++;
+  }
+
+  //for ROUTE POINTS 2
+  for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+    String routeNumber = (doc['Route Number']);
+    debugPrint('Show polyline $routeNumber');
+    List<GeoPoint> geoPoints = List.from(doc['Route Points 2']);
+    String routeDescription = (doc['Route Description']);
+    List<LatLng> latLngPoints = geoPoints
+        .map((point) => LatLng(point.latitude, point.longitude))
+        .toList();
+    debugPrint('Polyline fetch for $routeNumber: $latLngPoints');
+
+    //polyline color auto adjustable from rgb
+    ui.Color polylineColor = ui.Color.fromARGB(
+      255,
+      HSVColor.fromAHSV(
+              1.0, (hueStep * (polylineIdCounter - 1)) % 360, 1.0, 1.0)
+          .toColor()
+          .red,
+      HSVColor.fromAHSV(
+              1.0, (hueStep * (polylineIdCounter - 1)) % 360, 1.0, 1.0)
+          .toColor()
+          .green,
+      HSVColor.fromAHSV(
+              1.0, (hueStep * (polylineIdCounter - 1)) % 360, 1.0, 1.0)
           .toColor()
           .blue,
     );
@@ -109,7 +165,7 @@ Future<List<Polyline>> getSpecificPolylineFromFirestore(BuildContext context,
 
   for (QueryDocumentSnapshot doc in querySnapshot.docs) {
     if ((doc['Route Number']) == selectedRoute) {
-      List<GeoPoint> geoPoints = List.from(doc['Route Points']);
+      List<GeoPoint> geoPoints = List.from(doc['Route Points 1']);
       String routeNumber = (doc['Route Number']);
       String routeDescription = (doc['Route Description']);
       List<LatLng> latLngPoints = geoPoints
@@ -149,6 +205,57 @@ Future<List<Polyline>> getSpecificPolylineFromFirestore(BuildContext context,
               },
             );
           });
+
+      polylines.add(polyline);
+      polylineIdCounter++;
+    }
+  }
+  return polylines;
+}
+
+Future<List<Polyline>> getPolylineforCalculator(BuildContext context,
+    {String? selectedRoute}) async {
+  List<Polyline> polylines = [];
+  int polylineIdCounter = 1;
+
+  CollectionReference collection =
+      FirebaseFirestore.instance.collection('Routes');
+  QuerySnapshot querySnapshot = await collection.get();
+
+  int numPolylines = querySnapshot.docs.length;
+  double hueStep = 360 / numPolylines;
+
+  for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+    if ((doc['Route Number']) == selectedRoute) {
+      List<GeoPoint> geoPoints = List.from(doc['Route Points 1']);
+      String routeNumber = (doc['Route Number']);
+      debugPrint('Polyline for route number $routeNumber');
+      List<LatLng> latLngPoints = geoPoints
+          .map((point) => LatLng(point.latitude, point.longitude))
+          .toList();
+      debugPrint('Polyline fetch for $routeNumber: $latLngPoints');
+
+      //polyline color auto adjustable from rgb
+      ui.Color polylineColor = ui.Color.fromARGB(
+        255,
+        HSVColor.fromAHSV(1.0, hueStep * (polylineIdCounter - 1), 1.0, 1.0)
+            .toColor()
+            .red,
+        HSVColor.fromAHSV(1.0, hueStep * (polylineIdCounter - 1), 1.0, 1.0)
+            .toColor()
+            .green,
+        HSVColor.fromAHSV(1.0, hueStep * (polylineIdCounter - 1), 1.0, 1.0)
+            .toColor()
+            .blue,
+      );
+
+      Polyline polyline = Polyline(
+        polylineId: PolylineId(polylineIdCounter.toString()),
+        points: latLngPoints,
+        color: polylineColor,
+        width: 3,
+        consumeTapEvents: false,
+      );
 
       polylines.add(polyline);
       polylineIdCounter++;

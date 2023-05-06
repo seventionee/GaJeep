@@ -8,7 +8,7 @@ import '../providers/request_location_permission.dart';
 import 'package:search_map_place_updated/search_map_place_updated.dart';
 import '../component/constants.dart';
 import 'learnmore.dart';
-import '../providers/polylines_y_markers.dart';
+import '../providers/route_polylines.dart';
 import '../providers/jeeps_location.dart';
 import 'package:provider/provider.dart';
 import '../providers/jeep_info.dart';
