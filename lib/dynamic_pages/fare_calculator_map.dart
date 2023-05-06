@@ -27,10 +27,16 @@ class FareCalculatorMapInterface extends StatefulWidget {
 }
 
 class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey =
+      GlobalKey<ScaffoldState>(); // for polyline calculation
   final Completer<GoogleMapController> _mapControllerCompleter =
       Completer(); //for controlling google map interface
-  Set<Polyline> mappolylines = {}; //for polylines
+  //for polylines
+  Set<Polyline> mappolylines = {};
+  List<LatLng> polylinePoints = [];
+  List<LatLng> _selectedPoints = [];
+  Set<Marker> _markers = {};
+
   final bool _isrouteshown = true; //for toggling polylines appearance
   bool _firstLoad = true;
   late LatLng userLocation = const LatLng(10.298333, 123.893366);
@@ -102,6 +108,9 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
         .then((polylines) {
       setState(() {
         mappolylines = polylines.toSet();
+        if (polylines.isNotEmpty) {
+          polylinePoints = polylines.first.points;
+        }
       });
     });
   }
@@ -175,6 +184,67 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
         _firstLoad = false;
       }
     });
+  }
+
+  void _handleTap(LatLng tappedPoint) async {
+    LatLng closestPoint = _getClosestPoint(tappedPoint, polylinePoints);
+    if (_selectedPoints.length < 2) {
+      setState(() {
+        _selectedPoints.add(closestPoint);
+        _markers.add(
+          Marker(
+            markerId: MarkerId(_selectedPoints.length.toString()),
+            position: closestPoint,
+          ),
+        );
+      });
+      if (_selectedPoints.length == 2) {
+        double distance = await _calculateDistance(
+            _selectedPoints[0].latitude,
+            _selectedPoints[0].longitude,
+            _selectedPoints[1].latitude,
+            _selectedPoints[1].longitude);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Distance: ${distance.toStringAsFixed(2)} meters'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+
+        // Add a delay before clearing the markers
+        Future.delayed(Duration(seconds: 3), () {
+          setState(() {
+            _selectedPoints.clear();
+            _markers.clear();
+          });
+        });
+      }
+    }
+  }
+
+  LatLng _getClosestPoint(LatLng tappedPoint, List<LatLng> polylinePoints) {
+    late LatLng closestPoint;
+    double minDistance = double.infinity;
+    for (LatLng point in polylinePoints) {
+      double distance = Geolocator.distanceBetween(tappedPoint.latitude,
+          tappedPoint.longitude, point.latitude, point.longitude);
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestPoint = point;
+      }
+    }
+    return closestPoint;
+  }
+
+  Future<double> _calculateDistance(
+    double startLatitude,
+    double startLongitude,
+    double endLatitude,
+    double endLongitude,
+  ) async {
+    return Geolocator.distanceBetween(
+        startLatitude, startLongitude, endLatitude, endLongitude);
   }
 
   @override
@@ -363,9 +433,8 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
             return Stack(
               children: [
                 GoogleMap(
-                  onTap: (LatLng position) {
-                    debugPrint('TAPPED ON GOOGLE MAPS');
-                  },
+                  onTap: _handleTap,
+                  markers: _markers,
                   onCameraMove: (position) {
                     // Removed reference to vehicleLocationProvider
                   },
