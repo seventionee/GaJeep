@@ -32,7 +32,7 @@ class _Mapsinterface extends State<Mapsinterface> {
   bool _isrouteshown = true; //for toggling polylines appearance
   bool _firstLoad = true;
   LatLng userLocation = const LatLng(10.298333, 123.893366);
-  bool _showUserLocation = false;
+  final bool _showUserLocation = false;
   StreamSubscription<Position>?
       positionStreamSubscription; //constantly check user position
 
@@ -89,6 +89,7 @@ class _Mapsinterface extends State<Mapsinterface> {
     super.initState();
     requestLocationPermission();
     subscribeUserLocationUpdates();
+
     getPolylinesFromFirestore(context).then((polylines) {
       setState(() {
         mappolylines = polylines.toSet();
@@ -343,7 +344,7 @@ class _Mapsinterface extends State<Mapsinterface> {
                             myLocationEnabled: true,
                             initialCameraPosition: CameraPosition(
                               target: widget.initialPosition,
-                              zoom: 17,
+                              zoom: 15,
                             ),
                             zoomControlsEnabled: false,
                             myLocationButtonEnabled: false,

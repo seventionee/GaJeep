@@ -65,12 +65,10 @@ class MyApp extends StatelessWidget {
             return MaterialPageRoute(
                 builder: (context) => const RoutesDirectory());
           case RouteDetails.routeName:
-            final String routeNumber = settings.arguments as String;
             return MaterialPageRoute(
                 builder: (context) => const RouteDetails(routeNumber: ''));
           case RouteMapInterface.routeName:
             final LatLng initialPosition = settings.arguments as LatLng;
-            final String selectedRoute;
             return MaterialPageRoute(
                 builder: (context) => RouteMapInterface(
                       initialPosition: initialPosition,
