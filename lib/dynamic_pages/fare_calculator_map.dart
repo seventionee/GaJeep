@@ -34,8 +34,8 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
   //for polylines
   Set<Polyline> mappolylines = {};
   List<LatLng> polylinePoints = [];
-  List<LatLng> _selectedPoints = [];
-  Set<Marker> _markers = {};
+  final List<LatLng> _selectedPoints = [];
+  final Set<Marker> _markers = {};
 
   final bool _isrouteshown = true; //for toggling polylines appearance
   bool _firstLoad = true;
@@ -199,21 +199,18 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
         );
       });
       if (_selectedPoints.length == 2) {
-        double distance = await _calculateDistance(
-            _selectedPoints[0].latitude,
-            _selectedPoints[0].longitude,
-            _selectedPoints[1].latitude,
-            _selectedPoints[1].longitude);
+        double distance = _calculateDistanceAlongPolyline(
+            polylinePoints, _selectedPoints[0], _selectedPoints[1]);
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Distance: ${distance.toStringAsFixed(2)} meters'),
-            duration: Duration(seconds: 3),
+            duration: const Duration(seconds: 3),
           ),
         );
 
         // Add a delay before clearing the markers
-        Future.delayed(Duration(seconds: 3), () {
+        Future.delayed(const Duration(seconds: 3), () {
           setState(() {
             _selectedPoints.clear();
             _markers.clear();
@@ -237,14 +234,37 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
     return closestPoint;
   }
 
-  Future<double> _calculateDistance(
-    double startLatitude,
-    double startLongitude,
-    double endLatitude,
-    double endLongitude,
-  ) async {
-    return Geolocator.distanceBetween(
-        startLatitude, startLongitude, endLatitude, endLongitude);
+  double _calculateDistanceAlongPolyline(
+      List<LatLng> polylinePoints, LatLng start, LatLng end) {
+    double totalDistance = 0.0;
+    int startIndex = -1;
+    int endIndex = -1;
+
+    for (int i = 0; i < polylinePoints.length - 1; i++) {
+      LatLng point = polylinePoints[i];
+      LatLng nextPoint = polylinePoints[i + 1];
+
+      if (startIndex == -1 && (point == start || nextPoint == start)) {
+        startIndex = i;
+      }
+      if (endIndex == -1 && (point == end || nextPoint == end)) {
+        endIndex = i;
+      }
+      if (startIndex != -1 && endIndex != -1) {
+        break;
+      }
+    }
+
+    if (startIndex != -1 && endIndex != -1) {
+      for (int i = startIndex; i <= endIndex; i++) {
+        LatLng point = polylinePoints[i];
+        LatLng nextPoint = polylinePoints[i + 1];
+        totalDistance += Geolocator.distanceBetween(point.latitude,
+            point.longitude, nextPoint.latitude, nextPoint.longitude);
+      }
+    }
+
+    return totalDistance;
   }
 
   @override
