@@ -15,7 +15,7 @@ import '../pages/routes_directory.dart';
 import '../pages/mapsinterface.dart';
 
 class FareCalculatorMapInterface extends StatefulWidget {
-  static const routeName = '/farecalcultaormapinterface';
+  static const routeName = '/farecalculatormapinterface';
   final LatLng initialcalculatorposition;
   final String selectedRoute;
   const FareCalculatorMapInterface(
@@ -32,6 +32,8 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
   final Completer<GoogleMapController> _mapControllerCompleter =
       Completer(); //for controlling google map interface
   //for polylines
+
+  bool _useRoutePoints1 = false; //for toggling route orientation polylines
   Set<Polyline> mappolylines = {};
   List<LatLng> polylinePoints = [];
   final List<LatLng> _selectedPoints = [];
@@ -104,8 +106,11 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
     subscribeUserLocationUpdates();
     initialPosition = widget.initialcalculatorposition;
 
-    getPolylineforCalculator(context, selectedRoute: widget.selectedRoute)
-        .then((polylines) {
+    getPolylineforCalculator(
+      context,
+      selectedRoute: widget.selectedRoute,
+      useRoutePoints1: _useRoutePoints1,
+    ).then((polylines) {
       setState(() {
         mappolylines = polylines.toSet();
         if (polylines.isNotEmpty) {
@@ -474,7 +479,7 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
                   zoomControlsEnabled: false,
                   myLocationButtonEnabled: false,
                   mapToolbarEnabled: false,
-                  polylines: _isrouteshown ? mappolylines : {},
+                  polylines: mappolylines,
                 ),
                 Positioned(
                   top: 10,
@@ -541,6 +546,42 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
                     ),
                   ),
                 ),
+                //Toggle Route Orientation
+                Positioned(
+                    bottom: 16,
+                    left: 16,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.black, // set the border color
+                          width: 1.0, // set the border width
+                        ),
+                        borderRadius: BorderRadius.circular(
+                            50.0), // set the border radius
+                      ),
+                      child: FloatingActionButton(
+                          heroTag: null,
+                          foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+                          backgroundColor: secondaryColor,
+                          onPressed: () async {
+                            debugPrint('FAB IS TAPPED');
+                            setState(() {
+                              _useRoutePoints1 = !_useRoutePoints1;
+                            });
+
+                            List<Polyline> newPolylines =
+                                await getPolylineforCalculator(context,
+                                    selectedRoute: widget.selectedRoute,
+                                    useRoutePoints1: _useRoutePoints1);
+                            setState(() {
+                              mappolylines = newPolylines.toSet();
+                              if (newPolylines.isNotEmpty) {
+                                polylinePoints = newPolylines.first.points;
+                              }
+                            });
+                          },
+                          child: const Icon(Icons.mode_of_travel)),
+                    )),
               ],
             );
           }),
