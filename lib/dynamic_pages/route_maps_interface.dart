@@ -9,12 +9,13 @@ import '../providers/request_location_permission.dart';
 import 'package:search_map_place_updated/search_map_place_updated.dart';
 import '../component/constants.dart';
 import '../pages/learnmore.dart';
-import '../providers/polylines_y_markers.dart';
+import '../providers/route_polylines.dart';
 import '../providers/jeeps_location.dart';
 import 'package:provider/provider.dart';
 import '../providers/jeep_info.dart';
 import '../pages/routes_directory.dart';
 import '../pages/mapsinterface.dart';
+import '../dynamic_pages/fare_calculator_map.dart';
 
 class RouteMapInterface extends StatefulWidget {
   static const routeName = '/routemapinterface';
@@ -412,29 +413,6 @@ class _RouteMapInterface extends State<RouteMapInterface> {
                                   .vehicleMarkers.values
                                   .toSet(),
                             ),
-                            if (vehicleLocationProvider.selectedMarkerId !=
-                                null)
-                              if (vehicleLocationProvider.selectedMarkerId !=
-                                      null &&
-                                  !vehicleLocationProvider.isUpdatingWidget)
-                                Align(
-                                  alignment: Alignment.center,
-                                  child: Visibility(
-                                    visible: vehicleLocationProvider
-                                                .selectedMarkerId !=
-                                            null &&
-                                        !vehicleLocationProvider
-                                            .isUpdatingWidget,
-                                    child: VehicleInfoWidget(
-                                      jeepRoute: vehicleLocationProvider
-                                              .selectedJeepRoute ??
-                                          '',
-                                      capacityStatus: vehicleLocationProvider
-                                              .selectedCapacityStatus ??
-                                          '',
-                                    ),
-                                  ),
-                                ),
                           ],
                         );
                       },
@@ -548,7 +526,19 @@ class _RouteMapInterface extends State<RouteMapInterface> {
                             heroTag: null,
                             foregroundColor: const Color.fromARGB(255, 0, 0, 0),
                             backgroundColor: primaryColor,
-                            onPressed: _toggleroutesvisibility,
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      FareCalculatorMapInterface(
+                                    initialcalculatorposition:
+                                        widget.initialPosition,
+                                    selectedRoute: widget.selectedRoute,
+                                  ),
+                                ),
+                              );
+                            },
                             child: const Icon(Icons.calculate_rounded,
                                 color: Colors.black),
                           ),
