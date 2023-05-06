@@ -52,7 +52,8 @@ Future<List<Polyline>> getPolylinesFromFirestore(BuildContext context) async {
     String routeNumber = (doc['Route Number']);
     debugPrint('Show polyline $routeNumber');
     List<GeoPoint> geoPoints = List.from(doc['Route Points 1']);
-    String routeDescription = (doc['Route Description']);
+    String routeDescription = (doc['Direction Description 1']);
+    String routeOrientation = (doc['Direction Orientation 1']);
     List<LatLng> latLngPoints = geoPoints
         .map((point) => LatLng(point.latitude, point.longitude))
         .toList();
@@ -88,7 +89,8 @@ Future<List<Polyline>> getPolylinesFromFirestore(BuildContext context) async {
             builder: (BuildContext context) {
               return RouteDetailsModal(
                 routeName: routeNumber,
-                routeDescription: routeDescription,
+                directionDescription: routeDescription,
+                directionOrientation: routeOrientation,
               );
             },
           );
@@ -103,7 +105,8 @@ Future<List<Polyline>> getPolylinesFromFirestore(BuildContext context) async {
     String routeNumber = (doc['Route Number']);
     debugPrint('Show polyline $routeNumber');
     List<GeoPoint> geoPoints = List.from(doc['Route Points 2']);
-    String routeDescription = (doc['Route Description']);
+    String routeDescription = (doc['Direction Description 2']);
+    String routeOrientation = (doc['Direction Orientation 2']);
     List<LatLng> latLngPoints = geoPoints
         .map((point) => LatLng(point.latitude, point.longitude))
         .toList();
@@ -139,7 +142,8 @@ Future<List<Polyline>> getPolylinesFromFirestore(BuildContext context) async {
             builder: (BuildContext context) {
               return RouteDetailsModal(
                 routeName: routeNumber,
-                routeDescription: routeDescription,
+                directionDescription: routeDescription,
+                directionOrientation: routeOrientation,
               );
             },
           );
@@ -163,11 +167,13 @@ Future<List<Polyline>> getSpecificPolylineFromFirestore(BuildContext context,
   int numPolylines = querySnapshot.docs.length;
   double hueStep = 360 / numPolylines;
 
+  //for Route Points 1
   for (QueryDocumentSnapshot doc in querySnapshot.docs) {
     if ((doc['Route Number']) == selectedRoute) {
       List<GeoPoint> geoPoints = List.from(doc['Route Points 1']);
       String routeNumber = (doc['Route Number']);
-      String routeDescription = (doc['Route Description']);
+      String routeDescription = (doc['Direction Description 1']);
+      String routeOrientation = (doc['Direction Orientation 1']);
       List<LatLng> latLngPoints = geoPoints
           .map((point) => LatLng(point.latitude, point.longitude))
           .toList();
@@ -176,13 +182,16 @@ Future<List<Polyline>> getSpecificPolylineFromFirestore(BuildContext context,
       //polyline color auto adjustable from rgb
       ui.Color polylineColor = ui.Color.fromARGB(
         255,
-        HSVColor.fromAHSV(1.0, hueStep * (polylineIdCounter - 1), 1.0, 1.0)
+        HSVColor.fromAHSV(
+                1.0, (hueStep * (polylineIdCounter - 1)) % 360, 1.0, 1.0)
             .toColor()
             .red,
-        HSVColor.fromAHSV(1.0, hueStep * (polylineIdCounter - 1), 1.0, 1.0)
+        HSVColor.fromAHSV(
+                1.0, (hueStep * (polylineIdCounter - 1)) % 360, 1.0, 1.0)
             .toColor()
             .green,
-        HSVColor.fromAHSV(1.0, hueStep * (polylineIdCounter - 1), 1.0, 1.0)
+        HSVColor.fromAHSV(
+                1.0, (hueStep * (polylineIdCounter - 1)) % 360, 1.0, 1.0)
             .toColor()
             .blue,
       );
@@ -200,7 +209,8 @@ Future<List<Polyline>> getSpecificPolylineFromFirestore(BuildContext context,
               builder: (BuildContext context) {
                 return RouteDetailsModal(
                   routeName: routeNumber,
-                  routeDescription: routeDescription,
+                  directionDescription: routeDescription,
+                  directionOrientation: routeOrientation,
                 );
               },
             );
@@ -210,6 +220,62 @@ Future<List<Polyline>> getSpecificPolylineFromFirestore(BuildContext context,
       polylineIdCounter++;
     }
   }
+
+  //for route 2
+  //for Route Points 1
+  for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+    if ((doc['Route Number']) == selectedRoute) {
+      List<GeoPoint> geoPoints = List.from(doc['Route Points 2']);
+      String routeNumber = (doc['Route Number']);
+      String routeDescription = (doc['Direction Description 2']);
+      String routeOrientation = (doc['Direction Orientation 2']);
+      List<LatLng> latLngPoints = geoPoints
+          .map((point) => LatLng(point.latitude, point.longitude))
+          .toList();
+      debugPrint('Polyline fetch for $routeNumber: $latLngPoints');
+
+      //polyline color auto adjustable from rgb
+      ui.Color polylineColor = ui.Color.fromARGB(
+        255,
+        HSVColor.fromAHSV(
+                1.0, (hueStep * (polylineIdCounter - 1)) % 360, 1.0, 1.0)
+            .toColor()
+            .red,
+        HSVColor.fromAHSV(
+                1.0, (hueStep * (polylineIdCounter - 1)) % 360, 1.0, 1.0)
+            .toColor()
+            .green,
+        HSVColor.fromAHSV(
+                1.0, (hueStep * (polylineIdCounter - 1)) % 360, 1.0, 1.0)
+            .toColor()
+            .blue,
+      );
+
+      Polyline polyline = Polyline(
+          polylineId: PolylineId(polylineIdCounter.toString()),
+          points: latLngPoints,
+          color: polylineColor,
+          width: 3,
+          consumeTapEvents: true,
+          onTap: () {
+            debugPrint('Polyline is TAPPED!');
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return RouteDetailsModal(
+                  routeName: routeNumber,
+                  directionDescription: routeDescription,
+                  directionOrientation: routeOrientation,
+                );
+              },
+            );
+          });
+
+      polylines.add(polyline);
+      polylineIdCounter++;
+    }
+  }
+
   return polylines;
 }
 
