@@ -39,7 +39,7 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
   final List<LatLng> _selectedPoints = [];
   final Set<Marker> _markers = {};
 
-  final bool _isrouteshown = true; //for toggling polylines appearance
+  //for toggling polylines appearance
   bool _firstLoad = true;
   late LatLng userLocation = const LatLng(10.298333, 123.893366);
   late LatLng initialPosition;

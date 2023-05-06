@@ -280,7 +280,7 @@ Future<List<Polyline>> getSpecificPolylineFromFirestore(BuildContext context,
 }
 
 Future<List<Polyline>> getPolylineforCalculator(BuildContext context,
-    {String? selectedRoute, bool useRoutePoints1 = false}) async {
+    {String? selectedRoute, required bool useRoutePoints1}) async {
   List<Polyline> polylines = [];
   int polylineIdCounter = 1;
 
