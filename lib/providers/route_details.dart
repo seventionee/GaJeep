@@ -5,10 +5,14 @@ import '../dynamic_pages/route_details_screen.dart';
 
 class RouteDetailsModal extends StatefulWidget {
   final String routeName;
-  final String routeDescription;
+  final String directionDescription;
+  final String directionOrientation;
 
   const RouteDetailsModal(
-      {Key? key, required this.routeName, required this.routeDescription})
+      {Key? key,
+      required this.routeName,
+      required this.directionDescription,
+      required this.directionOrientation})
       : super(key: key);
 
   @override
@@ -29,7 +33,14 @@ class RouteDetailsModalState extends State<RouteDetailsModal> {
       content: SingleChildScrollView(
         child: ListBody(
           children: <Widget>[
-            Text(widget.routeDescription,
+            Text(widget.directionDescription,
+                style: const TextStyle(
+                  fontFamily: 'Epilogue', //font style
+                  fontWeight: FontWeight.w400,
+                  fontSize: 20.0,
+                  color: Colors.black,
+                )),
+            Text(widget.directionOrientation,
                 style: const TextStyle(
                   fontFamily: 'Epilogue', //font style
                   fontWeight: FontWeight.w400,
