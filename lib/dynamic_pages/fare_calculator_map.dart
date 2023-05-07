@@ -38,7 +38,7 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
   List<LatLng> polylinePoints = [];
   final List<LatLng> _selectedPoints = [];
   final Set<Marker> _markers = {};
-
+  String _currentDirectionDescription = '';
   //for toggling polylines appearance
   bool _firstLoad = true;
   late LatLng userLocation = const LatLng(10.298333, 123.893366);
@@ -116,6 +116,15 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
         if (polylines.isNotEmpty) {
           polylinePoints = polylines.first.points;
         }
+      });
+    });
+
+    getDirectionDescription(
+      widget.selectedRoute,
+      _useRoutePoints1,
+    ).then((directionDescription) {
+      setState(() {
+        _currentDirectionDescription = directionDescription;
       });
     });
   }
@@ -294,15 +303,28 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
             backgroundColor: primaryColor,
             centerTitle: true,
             automaticallyImplyLeading: false,
-            title: Text(
-              '${widget.selectedRoute} - Fare Calculator',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontFamily: 'Epilogue', //font style
-                fontWeight: FontWeight.w400,
-                fontSize: 20.0,
-                color: Colors.black,
-              ),
+            title: Column(
+              children: [
+                Text(
+                  '${widget.selectedRoute} - Fare Calculator',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontFamily: 'Epilogue', //font style
+                    fontWeight: FontWeight.w400,
+                    fontSize: 20.0,
+                    color: Colors.black,
+                  ),
+                ),
+                Text(
+                  _currentDirectionDescription,
+                  style: const TextStyle(
+                    fontFamily: 'Epilogue', //font style
+                    fontWeight: FontWeight.w400,
+                    fontSize: 16.0,
+                    color: Colors.black,
+                  ),
+                ),
+              ],
             ),
           ),
           drawer: Drawer(
@@ -579,6 +601,10 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
                                 polylinePoints = newPolylines.first.points;
                               }
                             });
+
+                            _currentDirectionDescription =
+                                await getDirectionDescription(
+                                    widget.selectedRoute, _useRoutePoints1);
                           },
                           child: const Icon(Icons.mode_of_travel)),
                     )),

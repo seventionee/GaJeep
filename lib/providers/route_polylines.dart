@@ -331,3 +331,22 @@ Future<List<Polyline>> getPolylineforCalculator(BuildContext context,
   }
   return polylines;
 }
+
+Future<String> getDirectionDescription(
+    String? selectedRoute, bool useRoutePoints1) async {
+  CollectionReference collection =
+      FirebaseFirestore.instance.collection('Routes');
+  QuerySnapshot querySnapshot = await collection.get();
+
+  for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+    if (doc['Route Number'] == selectedRoute) {
+      if (useRoutePoints1) {
+        return doc['Direction Description 1'];
+      } else {
+        return doc['Direction Description 2'];
+      }
+    }
+  }
+
+  return '';
+}

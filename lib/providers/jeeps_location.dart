@@ -21,6 +21,13 @@ class VehicleLocationProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<BitmapDescriptor> jeepMarker() async {
+    return await BitmapDescriptor.fromAssetImage(
+      const ImageConfiguration(devicePixelRatio: 2.5),
+      'asset/icons/jeep_up.png',
+    );
+  }
+
   void deselectMarker() {
     _selectedMarkerId = null;
     _selectedJeepRoute = null;
@@ -90,9 +97,11 @@ class VehicleLocationProvider with ChangeNotifier {
           : double.parse(
               snapshot['Bearing'].toString()); // Handle different data types
 
+      final jeepIcon = await jeepMarker();
       debugPrint('Bearing for $jeepRoute: $bearing');
       LatLng position = LatLng(location.latitude, location.longitude);
       Marker marker = Marker(
+        icon: jeepIcon,
         markerId: markerId,
         position: position,
         rotation: bearing,
