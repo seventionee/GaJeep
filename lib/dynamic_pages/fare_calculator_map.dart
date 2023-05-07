@@ -286,7 +286,7 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
               ? const Text(
                   'Please place the points in the opposite, correct order.')
               : Text(
-                  'Distance: ${distance.toStringAsFixed(2)} meters\n\nStart point address: $startPointAddress\nEnd point address: $endPointAddress\n\nRegular Fare: ${fare.toStringAsFixed(2)}\nDiscounted Fare: ${discountedFare.toStringAsFixed(2)}'),
+                  'Distance: ${distance.toStringAsFixed(2)} meters\n\nStart point: $startPointAddress\nEnd point: $endPointAddress\n\nRegular Fare: Php ${fare.toStringAsFixed(2)}\nDiscounted Fare (20%): Php ${discountedFare.toStringAsFixed(2)}'),
           actions: <Widget>[
             TextButton(
               style: ButtonStyle(
