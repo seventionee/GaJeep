@@ -234,21 +234,70 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
     }
   }
 
+  //fare calculator
+  double calculateFare(double distance, {bool isDiscounted = false}) {
+    double baseFare = 12.0;
+    double perKilometerRate = 1.50;
+    double firstFourKilometers = 4 * 1000; // meters
+    double discountRate = 0.20;
+
+    double fare = baseFare;
+
+    if (distance > firstFourKilometers) {
+      fare += (distance - firstFourKilometers) / 1000 * perKilometerRate;
+    }
+
+    if (isDiscounted) {
+      fare = fare * (1 - discountRate);
+    }
+
+    return fare;
+  }
+
 // Function to show the distance in an AlertDialog
   void showDistanceDialog(BuildContext context, double distance,
       String startPointAddress, String endPointAddress) {
+    double fare = calculateFare(distance);
+    double discountedFare = calculateFare(distance, isDiscounted: true);
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Distance'),
+          title: distance == 0.0
+              ? const Text(
+                  'Calculation Error',
+                  style: TextStyle(
+                    fontFamily: 'Epilogue', //font style
+                    fontWeight: FontWeight.w400,
+                    fontSize: 16.0,
+                    color: Colors.black,
+                  ),
+                )
+              : const Text(
+                  'Fare Calculation',
+                  style: TextStyle(
+                    fontFamily: 'Epilogue', //font style
+                    fontWeight: FontWeight.w400,
+                    fontSize: 16.0,
+                    color: Colors.black,
+                  ),
+                ),
           content: distance == 0.0
-              ? const Text('ERROR: Distance is 0.00 meters')
+              ? const Text(
+                  'Please place the points in the opposite, correct order.')
               : Text(
-                  '${distance.toStringAsFixed(2)} meters\n\nStart point address: $startPointAddress\nEnd point address: $endPointAddress'),
+                  'Distance: ${distance.toStringAsFixed(2)} meters\n\nStart point address: $startPointAddress\nEnd point address: $endPointAddress\n\nRegular Fare: ${fare.toStringAsFixed(2)}\nDiscounted Fare: ${discountedFare.toStringAsFixed(2)}'),
           actions: <Widget>[
             TextButton(
-              child: const Text('OK'),
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all<Color>(primaryColor),
+                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18.0),
+                    side: const BorderSide(color: Colors.black),
+                  ),
+                ),
+              ),
               onPressed: () {
                 setState(() {
                   _selectedPoints.clear();
@@ -256,6 +305,15 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
                 });
                 Navigator.of(context).pop();
               },
+              child: const Text(
+                'OK',
+                style: TextStyle(
+                  fontFamily: 'Epilogue', //font style
+                  fontWeight: FontWeight.w400,
+                  fontSize: 16.0,
+                  color: Colors.black,
+                ),
+              ),
             ),
           ],
         );
