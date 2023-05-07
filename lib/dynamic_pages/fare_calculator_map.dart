@@ -13,6 +13,7 @@ import '../providers/jeeps_location.dart';
 import 'package:provider/provider.dart';
 import '../pages/routes_directory.dart';
 import '../pages/mapsinterface.dart';
+import 'package:geocoding/geocoding.dart';
 
 class FareCalculatorMapInterface extends StatefulWidget {
   static const routeName = '/farecalculatormapinterface';
@@ -223,6 +224,16 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
           ),
         );
 
+        //getting startpointadress
+        String startPointAddress = await getAddressFromLatLng(
+            _selectedPoints[0].latitude, _selectedPoints[0].longitude);
+        debugPrint('Start point address: $startPointAddress');
+
+        //getting endpoint address
+        String endPointAddress = await getAddressFromLatLng(
+            _selectedPoints[1].latitude, _selectedPoints[1].longitude);
+        debugPrint('End point address: $endPointAddress');
+
         // Add a delay before clearing the markers
         Future.delayed(const Duration(seconds: 3), () {
           setState(() {
@@ -232,6 +243,20 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
         });
       }
     }
+  }
+
+  Future<String> getAddressFromLatLng(double latitude, double longitude) async {
+    try {
+      List<Placemark> placemarks =
+          await placemarkFromCoordinates(latitude, longitude);
+      if (placemarks.isNotEmpty) {
+        Placemark placemark = placemarks.first;
+        return '${placemark.street}, ${placemark.subLocality}, ${placemark.locality}, ${placemark.administrativeArea}, ${placemark.postalCode}, ${placemark.country}';
+      }
+    } catch (e) {
+      debugPrint('Error fetching address: $e');
+    }
+    return 'Address not found';
   }
 
   LatLng _getClosestPoint(LatLng tappedPoint, List<LatLng> polylinePoints) {
@@ -248,6 +273,7 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
     return closestPoint;
   }
 
+  //using Haversine formula
   double _calculateDistanceAlongPolyline(
       List<LatLng> polylinePoints, LatLng start, LatLng end) {
     double totalDistance = 0.0;
