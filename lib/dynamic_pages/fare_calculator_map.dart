@@ -40,6 +40,7 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
   final List<LatLng> _selectedPoints = [];
   final Set<Marker> _markers = {};
   String _currentDirectionDescription = '';
+  String _currentDirectionOrientation = '';
   //for toggling polylines appearance
   bool _firstLoad = true;
   late LatLng userLocation = const LatLng(10.298333, 123.893366);
@@ -126,6 +127,15 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
     ).then((directionDescription) {
       setState(() {
         _currentDirectionDescription = directionDescription;
+      });
+    });
+
+    getDirectionOrientation(
+      widget.selectedRoute,
+      _useRoutePoints1,
+    ).then((directionOrientation) {
+      setState(() {
+        _currentDirectionOrientation = directionOrientation;
       });
     });
   }
@@ -351,6 +361,15 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
                 ),
                 Text(
                   _currentDirectionDescription,
+                  style: const TextStyle(
+                    fontFamily: 'Epilogue', //font style
+                    fontWeight: FontWeight.w400,
+                    fontSize: 16.0,
+                    color: Colors.black,
+                  ),
+                ),
+                Text(
+                  _currentDirectionOrientation,
                   style: const TextStyle(
                     fontFamily: 'Epilogue', //font style
                     fontWeight: FontWeight.w400,
@@ -638,6 +657,10 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
 
                             _currentDirectionDescription =
                                 await getDirectionDescription(
+                                    widget.selectedRoute, _useRoutePoints1);
+
+                            _currentDirectionOrientation =
+                                await getDirectionOrientation(
                                     widget.selectedRoute, _useRoutePoints1);
                           },
                           child: const Icon(Icons.mode_of_travel)),

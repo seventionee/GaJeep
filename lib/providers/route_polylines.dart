@@ -350,3 +350,22 @@ Future<String> getDirectionDescription(
 
   return '';
 }
+
+Future<String> getDirectionOrientation(
+    String? selectedRoute, bool useRoutePoints1) async {
+  CollectionReference collection =
+      FirebaseFirestore.instance.collection('Routes');
+  QuerySnapshot querySnapshot = await collection.get();
+
+  for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+    if (doc['Route Number'] == selectedRoute) {
+      if (useRoutePoints1) {
+        return doc['Direction Orientation 2'];
+      } else {
+        return doc['Direction Orientation 1'];
+      }
+    }
+  }
+
+  return '';
+}
