@@ -50,6 +50,7 @@ dependencies:
   firebase_core_platform_interface: ^4.5.1
   http: ^0.13.5
   provider: ^6.0.5
+  geocoding: ^2.1.0
 
 
 
@@ -77,6 +78,7 @@ flutter:
   uses-material-design: true
   assets:
     - asset/logo/gajeep_logo1.png
+    - asset/icons/jeep_up.png
     - asset/mapstyle.json
     - asset/drawerheaderbackground1.png
     - asset/drawerheaderbackground1white.png

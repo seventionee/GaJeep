@@ -13,9 +13,10 @@ import '../providers/jeeps_location.dart';
 import 'package:provider/provider.dart';
 import '../pages/routes_directory.dart';
 import '../pages/mapsinterface.dart';
+import 'package:geocoding/geocoding.dart';
 
 class FareCalculatorMapInterface extends StatefulWidget {
-  static const routeName = '/farecalcultaormapinterface';
+  static const routeName = '/farecalculatormapinterface';
   final LatLng initialcalculatorposition;
   final String selectedRoute;
   const FareCalculatorMapInterface(
@@ -32,12 +33,15 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
   final Completer<GoogleMapController> _mapControllerCompleter =
       Completer(); //for controlling google map interface
   //for polylines
+
+  bool _useRoutePoints1 = false; //for toggling route orientation polylines
   Set<Polyline> mappolylines = {};
   List<LatLng> polylinePoints = [];
   final List<LatLng> _selectedPoints = [];
   final Set<Marker> _markers = {};
-
-  final bool _isrouteshown = true; //for toggling polylines appearance
+  String _currentDirectionDescription = '';
+  String _currentDirectionOrientation = '';
+  //for toggling polylines appearance
   bool _firstLoad = true;
   late LatLng userLocation = const LatLng(10.298333, 123.893366);
   late LatLng initialPosition;
@@ -104,8 +108,11 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
     subscribeUserLocationUpdates();
     initialPosition = widget.initialcalculatorposition;
 
-    getPolylineforCalculator(context, selectedRoute: widget.selectedRoute)
-        .then((polylines) {
+    getPolylineforCalculator(
+      context,
+      selectedRoute: widget.selectedRoute,
+      useRoutePoints1: _useRoutePoints1,
+    ).then((polylines) {
       setState(() {
         mappolylines = polylines.toSet();
         if (polylines.isNotEmpty) {
@@ -113,26 +120,24 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
         }
       });
     });
-  }
 
-  void onCameraMoveHandler(CameraPosition position,
-      VehicleLocationProvider vehicleLocationProvider) {
-    if (vehicleLocationProvider.selectedMarkerId != null) {
-      LatLng currentPosition = vehicleLocationProvider
-          .vehicleMarkers[vehicleLocationProvider.selectedMarkerId]!.position;
+    getDirectionDescription(
+      widget.selectedRoute,
+      _useRoutePoints1,
+    ).then((directionDescription) {
+      setState(() {
+        _currentDirectionDescription = directionDescription;
+      });
+    });
 
-      //getting distance
-      double distance = Geolocator.distanceBetween(
-          currentPosition.latitude,
-          currentPosition.longitude,
-          position.target.latitude,
-          position.target.longitude);
-
-      if (distance > 250) {
-        // You can adjust this threshold value as needed
-        vehicleLocationProvider.deselectMarker();
-      }
-    }
+    getDirectionOrientation(
+      widget.selectedRoute,
+      _useRoutePoints1,
+    ).then((directionOrientation) {
+      setState(() {
+        _currentDirectionOrientation = directionOrientation;
+      });
+    });
   }
 
   //toggling routes visibility via FAB
@@ -188,6 +193,7 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
 
   void _handleTap(LatLng tappedPoint) async {
     LatLng closestPoint = _getClosestPoint(tappedPoint, polylinePoints);
+
     if (_selectedPoints.length < 2) {
       setState(() {
         _selectedPoints.add(closestPoint);
@@ -202,12 +208,20 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
         double distance = _calculateDistanceAlongPolyline(
             polylinePoints, _selectedPoints[0], _selectedPoints[1]);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Distance: ${distance.toStringAsFixed(2)} meters'),
-            duration: const Duration(seconds: 3),
-          ),
-        );
+        //getting startpointadress
+        String startPointAddress = await getAddressFromLatLng(
+            _selectedPoints[0].latitude, _selectedPoints[0].longitude);
+        debugPrint('Start point address: $startPointAddress');
+
+        //getting endpoint address
+        String endPointAddress = await getAddressFromLatLng(
+            _selectedPoints[1].latitude, _selectedPoints[1].longitude);
+        debugPrint('End point address: $endPointAddress');
+
+        // Call the showDistanceDialog function
+        // ignore: use_build_context_synchronously
+        showDistanceDialog(
+            context, distance, startPointAddress, endPointAddress);
 
         // Add a delay before clearing the markers
         Future.delayed(const Duration(seconds: 3), () {
@@ -218,6 +232,107 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
         });
       }
     }
+  }
+
+  //fare calculator
+  double calculateFare(double distance, {bool isDiscounted = false}) {
+    double baseFare = 12.0;
+    double perKilometerRate = 1.50;
+    double firstFourKilometers = 4 * 1000; // meters
+    double discountRate = 0.20;
+
+    double fare = baseFare;
+
+    if (distance > firstFourKilometers) {
+      fare += (distance - firstFourKilometers) / 1000 * perKilometerRate;
+    }
+
+    if (isDiscounted) {
+      fare = fare * (1 - discountRate);
+    }
+
+    return fare;
+  }
+
+// Function to show the distance in an AlertDialog
+  void showDistanceDialog(BuildContext context, double distance,
+      String startPointAddress, String endPointAddress) {
+    double fare = calculateFare(distance);
+    double discountedFare = calculateFare(distance, isDiscounted: true);
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: distance == 0.0
+              ? const Text(
+                  'Calculation Error',
+                  style: TextStyle(
+                    fontFamily: 'Epilogue', //font style
+                    fontWeight: FontWeight.w400,
+                    fontSize: 16.0,
+                    color: Colors.black,
+                  ),
+                )
+              : const Text(
+                  'Fare Calculation',
+                  style: TextStyle(
+                    fontFamily: 'Epilogue', //font style
+                    fontWeight: FontWeight.w400,
+                    fontSize: 16.0,
+                    color: Colors.black,
+                  ),
+                ),
+          content: distance == 0.0
+              ? const Text(
+                  'Please place the points in the opposite, correct order.')
+              : Text(
+                  'Distance: ${distance.toStringAsFixed(2)} meters\n\nStart point: $startPointAddress\nEnd point: $endPointAddress\n\nRegular Fare: Php ${fare.toStringAsFixed(2)}\nDiscounted Fare (20%): Php ${discountedFare.toStringAsFixed(2)}'),
+          actions: <Widget>[
+            TextButton(
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all<Color>(primaryColor),
+                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18.0),
+                    side: const BorderSide(color: Colors.black),
+                  ),
+                ),
+              ),
+              onPressed: () {
+                setState(() {
+                  _selectedPoints.clear();
+                  _markers.clear();
+                });
+                Navigator.of(context).pop();
+              },
+              child: const Text(
+                'OK',
+                style: TextStyle(
+                  fontFamily: 'Epilogue', //font style
+                  fontWeight: FontWeight.w400,
+                  fontSize: 16.0,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<String> getAddressFromLatLng(double latitude, double longitude) async {
+    try {
+      List<Placemark> placemarks =
+          await placemarkFromCoordinates(latitude, longitude);
+      if (placemarks.isNotEmpty) {
+        Placemark placemark = placemarks.first;
+        return '${placemark.street}, ${placemark.subLocality}, ${placemark.locality}, ${placemark.administrativeArea}, ${placemark.postalCode}, ${placemark.country}';
+      }
+    } catch (e) {
+      debugPrint('Error fetching address: $e');
+    }
+    return 'Address not found';
   }
 
   LatLng _getClosestPoint(LatLng tappedPoint, List<LatLng> polylinePoints) {
@@ -234,6 +349,7 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
     return closestPoint;
   }
 
+  //using Haversine formula
   double _calculateDistanceAlongPolyline(
       List<LatLng> polylinePoints, LatLng start, LatLng end) {
     double totalDistance = 0.0;
@@ -289,15 +405,37 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
             backgroundColor: primaryColor,
             centerTitle: true,
             automaticallyImplyLeading: false,
-            title: Text(
-              '${widget.selectedRoute} - Fare Calculator',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontFamily: 'Epilogue', //font style
-                fontWeight: FontWeight.w400,
-                fontSize: 20.0,
-                color: Colors.black,
-              ),
+            title: Column(
+              children: [
+                Text(
+                  '${widget.selectedRoute} - Fare Calculator',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontFamily: 'Epilogue', //font style
+                    fontWeight: FontWeight.w400,
+                    fontSize: 20.0,
+                    color: Colors.black,
+                  ),
+                ),
+                Text(
+                  _currentDirectionDescription,
+                  style: const TextStyle(
+                    fontFamily: 'Epilogue', //font style
+                    fontWeight: FontWeight.w400,
+                    fontSize: 16.0,
+                    color: Colors.black,
+                  ),
+                ),
+                Text(
+                  _currentDirectionOrientation,
+                  style: const TextStyle(
+                    fontFamily: 'Epilogue', //font style
+                    fontWeight: FontWeight.w400,
+                    fontSize: 16.0,
+                    color: Colors.black,
+                  ),
+                ),
+              ],
             ),
           ),
           drawer: Drawer(
@@ -474,7 +612,7 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
                   zoomControlsEnabled: false,
                   myLocationButtonEnabled: false,
                   mapToolbarEnabled: false,
-                  polylines: _isrouteshown ? mappolylines : {},
+                  polylines: mappolylines,
                 ),
                 Positioned(
                   top: 10,
@@ -541,6 +679,50 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
                     ),
                   ),
                 ),
+                //Toggle Route Orientation
+                Positioned(
+                    bottom: 16,
+                    left: 16,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.black, // set the border color
+                          width: 1.0, // set the border width
+                        ),
+                        borderRadius: BorderRadius.circular(
+                            50.0), // set the border radius
+                      ),
+                      child: FloatingActionButton(
+                          heroTag: null,
+                          foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+                          backgroundColor: primaryColor,
+                          onPressed: () async {
+                            debugPrint('FAB IS TAPPED');
+                            setState(() {
+                              _useRoutePoints1 = !_useRoutePoints1;
+                            });
+
+                            List<Polyline> newPolylines =
+                                await getPolylineforCalculator(context,
+                                    selectedRoute: widget.selectedRoute,
+                                    useRoutePoints1: _useRoutePoints1);
+                            setState(() {
+                              mappolylines = newPolylines.toSet();
+                              if (newPolylines.isNotEmpty) {
+                                polylinePoints = newPolylines.first.points;
+                              }
+                            });
+
+                            _currentDirectionDescription =
+                                await getDirectionDescription(
+                                    widget.selectedRoute, _useRoutePoints1);
+
+                            _currentDirectionOrientation =
+                                await getDirectionOrientation(
+                                    widget.selectedRoute, _useRoutePoints1);
+                          },
+                          child: const Icon(Icons.mode_of_travel)),
+                    )),
               ],
             );
           }),

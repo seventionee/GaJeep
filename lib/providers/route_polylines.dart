@@ -280,7 +280,7 @@ Future<List<Polyline>> getSpecificPolylineFromFirestore(BuildContext context,
 }
 
 Future<List<Polyline>> getPolylineforCalculator(BuildContext context,
-    {String? selectedRoute}) async {
+    {String? selectedRoute, required bool useRoutePoints1}) async {
   List<Polyline> polylines = [];
   int polylineIdCounter = 1;
 
@@ -293,7 +293,9 @@ Future<List<Polyline>> getPolylineforCalculator(BuildContext context,
 
   for (QueryDocumentSnapshot doc in querySnapshot.docs) {
     if ((doc['Route Number']) == selectedRoute) {
-      List<GeoPoint> geoPoints = List.from(doc['Route Points 1']);
+      List<GeoPoint> geoPoints = useRoutePoints1
+          ? List.from(doc['Route Points 2'])
+          : List.from(doc['Route Points 1']);
       String routeNumber = (doc['Route Number']);
       debugPrint('Polyline for route number $routeNumber');
       List<LatLng> latLngPoints = geoPoints
@@ -328,4 +330,42 @@ Future<List<Polyline>> getPolylineforCalculator(BuildContext context,
     }
   }
   return polylines;
+}
+
+Future<String> getDirectionDescription(
+    String? selectedRoute, bool useRoutePoints1) async {
+  CollectionReference collection =
+      FirebaseFirestore.instance.collection('Routes');
+  QuerySnapshot querySnapshot = await collection.get();
+
+  for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+    if (doc['Route Number'] == selectedRoute) {
+      if (useRoutePoints1) {
+        return doc['Direction Description 2'];
+      } else {
+        return doc['Direction Description 1'];
+      }
+    }
+  }
+
+  return '';
+}
+
+Future<String> getDirectionOrientation(
+    String? selectedRoute, bool useRoutePoints1) async {
+  CollectionReference collection =
+      FirebaseFirestore.instance.collection('Routes');
+  QuerySnapshot querySnapshot = await collection.get();
+
+  for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+    if (doc['Route Number'] == selectedRoute) {
+      if (useRoutePoints1) {
+        return doc['Direction Orientation 2'];
+      } else {
+        return doc['Direction Orientation 1'];
+      }
+    }
+  }
+
+  return '';
 }
