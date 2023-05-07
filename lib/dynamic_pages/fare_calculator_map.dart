@@ -130,26 +130,6 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
     });
   }
 
-  void onCameraMoveHandler(CameraPosition position,
-      VehicleLocationProvider vehicleLocationProvider) {
-    if (vehicleLocationProvider.selectedMarkerId != null) {
-      LatLng currentPosition = vehicleLocationProvider
-          .vehicleMarkers[vehicleLocationProvider.selectedMarkerId]!.position;
-
-      //getting distance
-      double distance = Geolocator.distanceBetween(
-          currentPosition.latitude,
-          currentPosition.longitude,
-          position.target.latitude,
-          position.target.longitude);
-
-      if (distance > 250) {
-        // You can adjust this threshold value as needed
-        vehicleLocationProvider.deselectMarker();
-      }
-    }
-  }
-
   //toggling routes visibility via FAB
 
   void updateMapController(
@@ -203,6 +183,7 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
 
   void _handleTap(LatLng tappedPoint) async {
     LatLng closestPoint = _getClosestPoint(tappedPoint, polylinePoints);
+
     if (_selectedPoints.length < 2) {
       setState(() {
         _selectedPoints.add(closestPoint);
@@ -217,13 +198,6 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
         double distance = _calculateDistanceAlongPolyline(
             polylinePoints, _selectedPoints[0], _selectedPoints[1]);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Distance: ${distance.toStringAsFixed(2)} meters'),
-            duration: const Duration(seconds: 3),
-          ),
-        );
-
         //getting startpointadress
         String startPointAddress = await getAddressFromLatLng(
             _selectedPoints[0].latitude, _selectedPoints[0].longitude);
@@ -234,6 +208,11 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
             _selectedPoints[1].latitude, _selectedPoints[1].longitude);
         debugPrint('End point address: $endPointAddress');
 
+        // Call the showDistanceDialog function
+        // ignore: use_build_context_synchronously
+        showDistanceDialog(
+            context, distance, startPointAddress, endPointAddress);
+
         // Add a delay before clearing the markers
         Future.delayed(const Duration(seconds: 3), () {
           setState(() {
@@ -243,6 +222,35 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
         });
       }
     }
+  }
+
+// Function to show the distance in an AlertDialog
+  void showDistanceDialog(BuildContext context, double distance,
+      String startPointAddress, String endPointAddress) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Distance'),
+          content: distance == 0.0
+              ? const Text('ERROR: Distance is 0.00 meters')
+              : Text(
+                  '${distance.toStringAsFixed(2)} meters\n\nStart point address: $startPointAddress\nEnd point address: $endPointAddress'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                setState(() {
+                  _selectedPoints.clear();
+                  _markers.clear();
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<String> getAddressFromLatLng(double latitude, double longitude) async {
@@ -610,7 +618,7 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
                       child: FloatingActionButton(
                           heroTag: null,
                           foregroundColor: const Color.fromARGB(255, 0, 0, 0),
-                          backgroundColor: secondaryColor,
+                          backgroundColor: primaryColor,
                           onPressed: () async {
                             debugPrint('FAB IS TAPPED');
                             setState(() {

@@ -341,9 +341,9 @@ Future<String> getDirectionDescription(
   for (QueryDocumentSnapshot doc in querySnapshot.docs) {
     if (doc['Route Number'] == selectedRoute) {
       if (useRoutePoints1) {
-        return doc['Direction Description 1'];
-      } else {
         return doc['Direction Description 2'];
+      } else {
+        return doc['Direction Description 1'];
       }
     }
   }
