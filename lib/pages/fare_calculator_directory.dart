@@ -5,7 +5,6 @@ import '../providers/route_polylines.dart';
 import '../component/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../dynamic_pages/route_details_screen.dart';
 
 class FareCalculatorDirectory extends StatelessWidget {
   const FareCalculatorDirectory({Key? key}) : super(key: key);
@@ -152,7 +151,7 @@ class FareCalculatorDirectory extends StatelessWidget {
                             ),
                           ),
                           child: const Text(
-                            'View Route',
+                            'Calculate Fare',
                             style: TextStyle(
                               fontFamily: 'Epilogue', //font style
                               fontWeight: FontWeight.w400,

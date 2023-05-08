@@ -1,3 +1,6 @@
+import 'package:flutter_app_1/dynamic_pages/fare_calculator_map.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
 import '../providers/route_polylines.dart';
 import '../component/constants.dart';
 import 'package:flutter/material.dart';
@@ -54,6 +57,9 @@ class RoutesDirectory extends StatelessWidget {
               String routeNumber = snapshot.data![index]['Route Number'];
               String routeDescription =
                   snapshot.data![index]['Route Description'];
+              GeoPoint centralPointGeo = snapshot.data![index]['Central Point'];
+              LatLng centralPoint =
+                  LatLng(centralPointGeo.latitude, centralPointGeo.longitude);
               return Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Container(
@@ -116,8 +122,9 @@ class RoutesDirectory extends StatelessWidget {
                           ],
                         ),
                       ),
+                      // View Route Button
                       Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        padding: const EdgeInsets.symmetric(vertical: 4),
                         child: TextButton(
                           onPressed: () {
                             Navigator.push(
@@ -145,6 +152,47 @@ class RoutesDirectory extends StatelessWidget {
                           ),
                           child: const Text(
                             'View Route',
+                            style: TextStyle(
+                              fontFamily: 'Epilogue', //font style
+                              fontWeight: FontWeight.w400,
+                              fontSize: 20.0,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                      ),
+                      //Calculate Fare
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    FareCalculatorMapInterface(
+                                  initialcalculatorposition: centralPoint,
+                                  selectedRoute: routeNumber,
+                                ),
+                              ),
+                            );
+                          },
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all<Color>(
+                                secondaryColor),
+                            shape: MaterialStateProperty.all<
+                                RoundedRectangleBorder>(
+                              RoundedRectangleBorder(
+                                side: const BorderSide(
+                                  color: Color.fromARGB(255, 0, 0, 0),
+                                  width: 1.0,
+                                ),
+                                borderRadius: BorderRadius.circular(18.0),
+                              ),
+                            ),
+                          ),
+                          child: const Text(
+                            'Calculate Fare',
                             style: TextStyle(
                               fontFamily: 'Epilogue', //font style
                               fontWeight: FontWeight.w400,
