@@ -5,9 +5,13 @@ import '../dynamic_pages/route_details_screen.dart';
 class VehicleInfoWidget extends StatefulWidget {
   final String jeepRoute;
   final String capacityStatus;
+  final String plateNumber;
 
   const VehicleInfoWidget(
-      {super.key, required this.jeepRoute, required this.capacityStatus});
+      {super.key,
+      required this.jeepRoute,
+      required this.capacityStatus,
+      required this.plateNumber});
 
   @override
   VehicleInfoWidgetState createState() => VehicleInfoWidgetState();
@@ -37,13 +41,24 @@ class VehicleInfoWidgetState extends State<VehicleInfoWidget> {
             child: ListBody(
               children: <Widget>[
                 Center(
-                  child: Text('Capacity Status: ${widget.capacityStatus}',
-                      style: const TextStyle(
-                        fontFamily: 'Epilogue', //font style
-                        fontWeight: FontWeight.w400,
-                        fontSize: 16.0,
-                        color: Colors.black,
-                      )),
+                  child: Column(
+                    children: [
+                      Text('Plate Number: ${widget.plateNumber}',
+                          style: const TextStyle(
+                            fontFamily: 'Epilogue', //font style
+                            fontWeight: FontWeight.w400,
+                            fontSize: 16.0,
+                            color: Colors.black,
+                          )),
+                      Text('Capacity Status: ${widget.capacityStatus}',
+                          style: const TextStyle(
+                            fontFamily: 'Epilogue', //font style
+                            fontWeight: FontWeight.w400,
+                            fontSize: 16.0,
+                            color: Colors.black,
+                          )),
+                    ],
+                  ),
                 ),
               ],
             ),

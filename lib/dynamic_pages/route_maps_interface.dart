@@ -437,6 +437,9 @@ class _RouteMapInterface extends State<RouteMapInterface> {
                                       capacityStatus: vehicleLocationProvider
                                               .selectedCapacityStatus ??
                                           '',
+                                      plateNumber: vehicleLocationProvider
+                                              .selectedPlateNumber ??
+                                          '',
                                     ),
                                   ),
                                 ),

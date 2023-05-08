@@ -376,6 +376,9 @@ class _Mapsinterface extends State<Mapsinterface> {
                                     capacityStatus: vehicleLocationProvider
                                             .selectedCapacityStatus ??
                                         '',
+                                    plateNumber: vehicleLocationProvider
+                                            .selectedPlateNumber ??
+                                        '',
                                   ),
                                 ),
                               ),
