@@ -117,7 +117,7 @@ class RouteDetailsModalState extends State<RouteDetailsModal> {
             ),
           ),
           child: const Text(
-            'View Route',
+            'Route Details',
             style: TextStyle(
               fontFamily: 'Epilogue', //font style
               fontWeight: FontWeight.w400,

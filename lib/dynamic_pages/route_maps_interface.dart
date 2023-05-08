@@ -99,7 +99,7 @@ class _RouteMapInterface extends State<RouteMapInterface> {
     subscribeUserLocationUpdates();
     initialPosition = widget.initialPosition;
 
-    getPolylineforCalculator(
+    getPolylineForSpecificRoute(
       context,
       selectedRoute: widget.selectedRoute,
       useRoutePoints1: _useRoutePoints1,
@@ -432,6 +432,7 @@ class _RouteMapInterface extends State<RouteMapInterface> {
                                 debugPrint('TAPPED ON GOOGLE MAPS');
                                 vehicleLocationProvider.deselectMarker();
                               },
+                              rotateGesturesEnabled: false,
                               onCameraMove: (position) {
                                 onCameraMoveHandler(
                                     position, vehicleLocationProvider);
@@ -481,6 +482,9 @@ class _RouteMapInterface extends State<RouteMapInterface> {
                                           '',
                                       plateNumber: vehicleLocationProvider
                                               .selectedPlateNumber ??
+                                          '',
+                                      picture: vehicleLocationProvider
+                                              .selectedPicture ??
                                           '',
                                     ),
                                   ),
@@ -591,7 +595,7 @@ class _RouteMapInterface extends State<RouteMapInterface> {
 
                                 List<Polyline> newPolylines =
                                     // ignore: use_build_context_synchronously
-                                    await getPolylineforCalculator(context,
+                                    await getPolylineForSpecificRoute(context,
                                         selectedRoute: widget.selectedRoute,
                                         useRoutePoints1: _useRoutePoints1);
                                 setState(() {
