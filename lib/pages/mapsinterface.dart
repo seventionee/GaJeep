@@ -331,6 +331,7 @@ class _Mapsinterface extends State<Mapsinterface> {
                               debugPrint('TAPPED ON GOOGLE MAPS');
                               vehicleLocationProvider.deselectMarker();
                             },
+                            rotateGesturesEnabled: false,
                             onCameraMove: (position) {
                               onCameraMoveHandler(
                                   position, vehicleLocationProvider);
@@ -378,6 +379,9 @@ class _Mapsinterface extends State<Mapsinterface> {
                                         '',
                                     plateNumber: vehicleLocationProvider
                                             .selectedPlateNumber ??
+                                        '',
+                                    picture: vehicleLocationProvider
+                                            .selectedPicture ??
                                         '',
                                   ),
                                 ),
