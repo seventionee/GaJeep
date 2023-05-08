@@ -32,10 +32,14 @@ class _RouteMapInterface extends State<RouteMapInterface> {
   final Completer<GoogleMapController> _mapControllerCompleter =
       Completer(); //for controlling google map interface
   Set<Polyline> mappolylines = {}; //for polylines
-  bool _isrouteshown = true; //for toggling polylines appearance
+  final bool _isrouteshown = true; //for toggling polylines appearance
   bool _firstLoad = true;
+  bool _useRoutePoints1 = false;
+  String _currentDirectionDescription = '';
+  String _currentDirectionOrientation = '';
   late LatLng userLocation = const LatLng(10.298333, 123.893366);
   late LatLng initialPosition;
+  List<LatLng> polylinePoints = [];
   final bool _showUserLocation = false;
   StreamSubscription<Position>?
       positionStreamSubscription; //constantly check user position
@@ -95,11 +99,34 @@ class _RouteMapInterface extends State<RouteMapInterface> {
     subscribeUserLocationUpdates();
     initialPosition = widget.initialPosition;
 
-    getSpecificPolylineFromFirestore(context,
-            selectedRoute: widget.selectedRoute)
-        .then((polylines) {
+    getPolylineforCalculator(
+      context,
+      selectedRoute: widget.selectedRoute,
+      useRoutePoints1: _useRoutePoints1,
+    ).then((polylines) {
       setState(() {
         mappolylines = polylines.toSet();
+        if (polylines.isNotEmpty) {
+          polylinePoints = polylines.first.points;
+        }
+      });
+    });
+
+    getDirectionDescription(
+      widget.selectedRoute,
+      _useRoutePoints1,
+    ).then((directionDescription) {
+      setState(() {
+        _currentDirectionDescription = directionDescription;
+      });
+    });
+
+    getDirectionOrientation(
+      widget.selectedRoute,
+      _useRoutePoints1,
+    ).then((directionOrientation) {
+      setState(() {
+        _currentDirectionOrientation = directionOrientation;
       });
     });
   }
@@ -122,13 +149,6 @@ class _RouteMapInterface extends State<RouteMapInterface> {
         vehicleLocationProvider.deselectMarker();
       }
     }
-  }
-
-  //toggling routes visibility via FAB
-  void _toggleroutesvisibility() {
-    setState(() {
-      _isrouteshown = !_isrouteshown;
-    });
   }
 
   void updateMapController(
@@ -206,15 +226,37 @@ class _RouteMapInterface extends State<RouteMapInterface> {
                 backgroundColor: primaryColor,
                 centerTitle: true,
                 automaticallyImplyLeading: false,
-                title: Text(
-                  '${widget.selectedRoute} - Route Map',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontFamily: 'Epilogue', //font style
-                    fontWeight: FontWeight.w400,
-                    fontSize: 20.0,
-                    color: Colors.black,
-                  ),
+                title: Column(
+                  children: [
+                    Text(
+                      '${widget.selectedRoute} - Route Map',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontFamily: 'Epilogue', //font style
+                        fontWeight: FontWeight.w400,
+                        fontSize: 20.0,
+                        color: Colors.black,
+                      ),
+                    ),
+                    Text(
+                      _currentDirectionDescription,
+                      style: const TextStyle(
+                        fontFamily: 'Epilogue', //font style
+                        fontWeight: FontWeight.w400,
+                        fontSize: 16.0,
+                        color: Colors.black,
+                      ),
+                    ),
+                    Text(
+                      _currentDirectionOrientation,
+                      style: const TextStyle(
+                        fontFamily: 'Epilogue', //font style
+                        fontWeight: FontWeight.w400,
+                        fontSize: 16.0,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               drawer: Drawer(
@@ -529,14 +571,37 @@ class _RouteMapInterface extends State<RouteMapInterface> {
                                 50.0), // set the border radius
                           ),
                           child: FloatingActionButton(
-                            heroTag: null,
-                            foregroundColor: const Color.fromARGB(255, 0, 0, 0),
-                            backgroundColor: secondaryColor,
-                            onPressed: _toggleroutesvisibility,
-                            child: Icon(_isrouteshown
-                                ? Icons.directions
-                                : Icons.directions_off),
-                          ),
+                              heroTag: null,
+                              foregroundColor:
+                                  const Color.fromARGB(255, 0, 0, 0),
+                              backgroundColor: secondaryColor,
+                              onPressed: () async {
+                                debugPrint('FAB IS TAPPED');
+                                setState(() {
+                                  _useRoutePoints1 = !_useRoutePoints1;
+                                });
+
+                                _currentDirectionDescription =
+                                    await getDirectionDescription(
+                                        widget.selectedRoute, _useRoutePoints1);
+
+                                _currentDirectionOrientation =
+                                    await getDirectionOrientation(
+                                        widget.selectedRoute, _useRoutePoints1);
+
+                                List<Polyline> newPolylines =
+                                    // ignore: use_build_context_synchronously
+                                    await getPolylineforCalculator(context,
+                                        selectedRoute: widget.selectedRoute,
+                                        useRoutePoints1: _useRoutePoints1);
+                                setState(() {
+                                  mappolylines = newPolylines.toSet();
+                                  if (newPolylines.isNotEmpty) {
+                                    polylinePoints = newPolylines.first.points;
+                                  }
+                                });
+                              },
+                              child: const Icon(Icons.mode_of_travel)),
                         )),
 
                     //Fare calculator button
