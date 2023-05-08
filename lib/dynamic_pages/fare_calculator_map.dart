@@ -702,7 +702,16 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
                               _useRoutePoints1 = !_useRoutePoints1;
                             });
 
+                            _currentDirectionDescription =
+                                await getDirectionDescription(
+                                    widget.selectedRoute, _useRoutePoints1);
+
+                            _currentDirectionOrientation =
+                                await getDirectionOrientation(
+                                    widget.selectedRoute, _useRoutePoints1);
+
                             List<Polyline> newPolylines =
+                                // ignore: use_build_context_synchronously
                                 await getPolylineforCalculator(context,
                                     selectedRoute: widget.selectedRoute,
                                     useRoutePoints1: _useRoutePoints1);
@@ -712,14 +721,6 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
                                 polylinePoints = newPolylines.first.points;
                               }
                             });
-
-                            _currentDirectionDescription =
-                                await getDirectionDescription(
-                                    widget.selectedRoute, _useRoutePoints1);
-
-                            _currentDirectionOrientation =
-                                await getDirectionOrientation(
-                                    widget.selectedRoute, _useRoutePoints1);
                           },
                           child: const Icon(Icons.mode_of_travel)),
                     )),

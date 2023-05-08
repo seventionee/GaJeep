@@ -5,11 +5,10 @@ import '../providers/route_polylines.dart';
 import '../component/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../dynamic_pages/route_details_screen.dart';
 
-class RoutesDirectory extends StatelessWidget {
-  const RoutesDirectory({Key? key}) : super(key: key);
-  static const routeName = '/routesdirectory';
+class FareCalculatorDirectory extends StatelessWidget {
+  const FareCalculatorDirectory({Key? key}) : super(key: key);
+  static const routeName = '/farecalculatordirectory';
 
   Future<List<QueryDocumentSnapshot>> fetchRoutes() async {
     CollectionReference collection =
@@ -29,7 +28,7 @@ class RoutesDirectory extends StatelessWidget {
             icon: const Icon(Icons.arrow_back),
             color: Colors.black),
         title: const Text(
-          'Routes Directory',
+          'Fare Calculator Directory',
           style: TextStyle(
             fontFamily: 'Epilogue', //font style
             fontWeight: FontWeight.w400,
@@ -55,11 +54,11 @@ class RoutesDirectory extends StatelessWidget {
             itemCount: snapshot.data!.length,
             itemBuilder: (BuildContext ctx, int index) {
               String routeNumber = snapshot.data![index]['Route Number'];
-              String routeDescription =
-                  snapshot.data![index]['Route Description'];
               GeoPoint centralPointGeo = snapshot.data![index]['Central Point'];
               LatLng centralPoint =
                   LatLng(centralPointGeo.latitude, centralPointGeo.longitude);
+              String routeDescription =
+                  snapshot.data![index]['Route Description'];
               return Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Container(
@@ -122,48 +121,8 @@ class RoutesDirectory extends StatelessWidget {
                           ],
                         ),
                       ),
-                      // View Route Button
                       Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        child: TextButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => RouteDetails(
-                                  routeNumber: routeNumber,
-                                ),
-                              ),
-                            );
-                          },
-                          style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all<Color>(
-                                secondaryColor),
-                            shape: MaterialStateProperty.all<
-                                RoundedRectangleBorder>(
-                              RoundedRectangleBorder(
-                                side: const BorderSide(
-                                  color: Color.fromARGB(255, 0, 0, 0),
-                                  width: 1.0,
-                                ),
-                                borderRadius: BorderRadius.circular(18.0),
-                              ),
-                            ),
-                          ),
-                          child: const Text(
-                            'View Route',
-                            style: TextStyle(
-                              fontFamily: 'Epilogue', //font style
-                              fontWeight: FontWeight.w400,
-                              fontSize: 20.0,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ),
-                      ),
-                      //Calculate Fare
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: TextButton(
                           onPressed: () {
                             Navigator.push(

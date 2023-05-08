@@ -32,6 +32,7 @@ class VehicleLocationProvider with ChangeNotifier {
     _selectedMarkerId = null;
     _selectedJeepRoute = null;
     _selectedCapacityStatus = null;
+    _selectedPlateNumber = null;
     notifyListeners();
   }
 
@@ -63,12 +64,14 @@ class VehicleLocationProvider with ChangeNotifier {
 
   String? _selectedJeepRoute;
   String? _selectedCapacityStatus;
+  String? _selectedPlateNumber;
 
   MarkerId? _selectedMarkerId;
 
   MarkerId? get selectedMarkerId => _selectedMarkerId;
   String? get selectedJeepRoute => _selectedJeepRoute;
   String? get selectedCapacityStatus => _selectedCapacityStatus;
+  String? get selectedPlateNumber => _selectedPlateNumber;
 
   VehicleLocationProvider({String? routeFilter}) {
     _routeFilter = routeFilter;
@@ -92,6 +95,7 @@ class VehicleLocationProvider with ChangeNotifier {
       GeoPoint location = snapshot['Location'];
       String jeepRoute = snapshot['Route Number'];
       String capacityStatus = snapshot['Capacity'];
+      String plateNumber = snapshot['Plate Number'];
       double bearing = snapshot['Bearing'] is double
           ? snapshot['Bearing']
           : double.parse(
@@ -109,6 +113,7 @@ class VehicleLocationProvider with ChangeNotifier {
           _selectedMarkerId = markerId;
           _selectedJeepRoute = jeepRoute;
           _selectedCapacityStatus = capacityStatus;
+          _selectedPlateNumber = plateNumber;
           _lockedMarkerId = markerId; // Lock the marker when tapped
           notifyListeners();
         },
