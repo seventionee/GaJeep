@@ -47,11 +47,30 @@ class VehicleInfoWidgetState extends State<VehicleInfoWidget> {
                     FittedBox(
                       child: Image.network(imageUrl),
                     ),
-                    IconButton(
+                    TextButton(
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
-                      icon: const Icon(Icons.close, color: Colors.white),
+                      style: ButtonStyle(
+                        backgroundColor:
+                            MaterialStateProperty.all<Color>(secondaryColor),
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18.0),
+                            side: const BorderSide(color: Colors.black),
+                          ),
+                        ),
+                      ),
+                      child: const Text(
+                        'Close Image',
+                        style: TextStyle(
+                          fontFamily: 'Epilogue', //font style
+                          fontWeight: FontWeight.w400,
+                          fontSize: 22.0,
+                          color: Colors.black,
+                        ),
+                      ),
                     ),
                   ],
                 ),
