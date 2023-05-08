@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app_1/dynamic_pages/route_details_screen.dart';
+import 'package:flutter_app_1/pages/fare_calculator_directory.dart';
 import 'dart:math';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
@@ -324,7 +325,10 @@ class _RouteMapInterface extends State<RouteMapInterface> {
                           ),
                           leading: const Icon(Icons.calculate_rounded,
                               color: Colors.black),
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.of(context)
+                                .pushNamed(FareCalculatorDirectory.routeName);
+                          },
                         ),
                       ),
                     ),
