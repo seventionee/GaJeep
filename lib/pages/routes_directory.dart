@@ -151,7 +151,7 @@ class RoutesDirectory extends StatelessWidget {
                             ),
                           ),
                           child: const Text(
-                            'View Route',
+                            'Route Details',
                             style: TextStyle(
                               fontFamily: 'Epilogue', //font style
                               fontWeight: FontWeight.w400,

@@ -73,23 +73,38 @@ class _RouteDetailsState extends State<RouteDetails> {
 
           return ListView(
             children: [
-              ListTile(
-                title: Text(
-                  'Route Number: $routeNumber',
-                  style: const TextStyle(
-                    fontFamily: 'Epilogue', //font style
-                    fontWeight: FontWeight.w400,
-                    fontSize: 20.0,
-                    color: Colors.black,
-                  ),
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: backgroundColor,
+                  borderRadius: BorderRadius.circular(20.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-                subtitle: Text(
-                  'Route Description: $routeDescription',
-                  style: const TextStyle(
-                    fontFamily: 'Epilogue', //font style
-                    fontWeight: FontWeight.w400,
-                    fontSize: 20.0,
-                    color: Colors.black,
+                child: ListTile(
+                  title: Text(
+                    'Route Number: $routeNumber',
+                    style: const TextStyle(
+                      fontFamily: 'Epilogue', //font style
+                      fontWeight: FontWeight.w400,
+                      fontSize: 20.0,
+                      color: Colors.black,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Route Description: $routeDescription',
+                    style: const TextStyle(
+                      fontFamily: 'Epilogue', //font style
+                      fontWeight: FontWeight.w400,
+                      fontSize: 20.0,
+                      color: Colors.black,
+                    ),
                   ),
                 ),
               ),
@@ -99,9 +114,10 @@ class _RouteDetailsState extends State<RouteDetails> {
                   style: TextStyle(
                     fontFamily: 'Epilogue', //font style
                     fontWeight: FontWeight.w400,
-                    fontSize: 20.0,
+                    fontSize: 15.0,
                     color: Colors.black,
                   ),
+                  textAlign: TextAlign.center,
                 ),
                 subtitle: StreamBuilder<int>(
                   stream: getActiveVehiclesForRoute(widget.routeNumber),
@@ -124,24 +140,47 @@ class _RouteDetailsState extends State<RouteDetails> {
                         fontSize: 20.0,
                         color: Colors.black,
                       ),
+                      textAlign: TextAlign.center,
                     );
                   },
                 ),
               ),
               ListTile(
-                title: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => RouteMapInterface(
-                          initialPosition: centralPoint,
-                          selectedRoute: routeNumber,
+                title: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 65.0, vertical: 0.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RouteMapInterface(
+                            initialPosition: centralPoint,
+                            selectedRoute: routeNumber,
+                          ),
+                        ),
+                      );
+                    },
+                    style: ButtonStyle(
+                      backgroundColor:
+                          MaterialStateProperty.all<Color>(secondaryColor),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18.0),
+                          side: const BorderSide(color: Colors.black),
                         ),
                       ),
-                    );
-                  },
-                  child: const Text('View Route On Map'),
+                    ),
+                    child: const Text(
+                      'View Route On Map',
+                      style: TextStyle(
+                        fontFamily: 'Epilogue',
+                        fontWeight: FontWeight.w400,
+                        fontSize: 20.0,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
                 ),
               ),
               const ListTile(
@@ -150,9 +189,10 @@ class _RouteDetailsState extends State<RouteDetails> {
                   style: TextStyle(
                     fontFamily: 'Epilogue', //font style
                     fontWeight: FontWeight.w400,
-                    fontSize: 20.0,
+                    fontSize: 18.0,
                     color: Colors.black,
                   ),
+                  textAlign: TextAlign.center,
                 ),
               ),
               StreamBuilder<List<Map<String, dynamic>>>(
@@ -196,38 +236,86 @@ class _RouteDetailsState extends State<RouteDetails> {
                                 vehicleLocationGeoPoint.latitude,
                                 vehicleLocationGeoPoint.longitude);
 
-                            return ListTile(
-                              title: Text(
-                                'Plate Number: $plateNumber',
-                                style: const TextStyle(
-                                  fontFamily: 'Epilogue', //font style
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 20.0,
-                                  color: Colors.black,
+                            return Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: const Color.fromARGB(255, 0, 0, 0),
+                                    width: 1.0,
+                                  ),
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(25.0)),
+                                  color: primaryColor,
                                 ),
-                              ),
-                              subtitle: Text(
-                                'Capacity Status: $capacityStatus',
-                                style: const TextStyle(
-                                  fontFamily: 'Epilogue', //font style
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 20.0,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              trailing: ElevatedButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => RouteMapInterface(
-                                        initialPosition: vehicleLocation,
-                                        selectedRoute: routeNumber,
+                                child: Column(
+                                  children: [
+                                    ListTile(
+                                      title: Text(
+                                        'Plate Number: $plateNumber',
+                                        style: const TextStyle(
+                                          fontFamily: 'Epilogue',
+                                          fontWeight: FontWeight.w400,
+                                          fontSize: 20.0,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                      subtitle: Text(
+                                        'Capacity Status: $capacityStatus',
+                                        style: const TextStyle(
+                                          fontFamily: 'Epilogue',
+                                          fontWeight: FontWeight.w400,
+                                          fontSize: 20.0,
+                                          color: Colors.black,
+                                        ),
                                       ),
                                     ),
-                                  );
-                                },
-                                child: const Text('View Jeep On Map'),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 4),
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  RouteMapInterface(
+                                                initialPosition:
+                                                    vehicleLocation,
+                                                selectedRoute: routeNumber,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        style: ButtonStyle(
+                                          backgroundColor:
+                                              MaterialStateProperty.all<Color>(
+                                                  secondaryColor),
+                                          shape: MaterialStateProperty.all<
+                                              RoundedRectangleBorder>(
+                                            RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(18.0),
+                                              side: const BorderSide(
+                                                  color: Color.fromARGB(
+                                                      255, 0, 0, 0),
+                                                  width: 1.0),
+                                            ),
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          'View Jeep On Map',
+                                          style: TextStyle(
+                                            fontFamily: 'Epilogue',
+                                            fontWeight: FontWeight.w400,
+                                            fontSize: 20.0,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             );
                           },
