@@ -15,6 +15,7 @@ import '../providers/jeeps_location.dart';
 import 'package:provider/provider.dart';
 import '../providers/jeep_info.dart';
 import 'routes_directory.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 // ignore: use_key_in_widget_constructors
 class Mapsinterface extends StatefulWidget {
@@ -31,7 +32,8 @@ class _Mapsinterface extends State<Mapsinterface> {
   final Completer<GoogleMapController> _mapControllerCompleter =
       Completer(); //for controlling google map interface
   Set<Polyline> mappolylines = {}; //for polylines
-  bool _isrouteshown = true; //for toggling polylines appearance
+  bool _isrouteshown = true;
+  bool _locationEnabled = false; //for toggling polylines appearance
   bool _firstLoad = true;
   LatLng userLocation = const LatLng(10.298333, 123.893366);
   final bool _showUserLocation = false;
@@ -90,12 +92,20 @@ class _Mapsinterface extends State<Mapsinterface> {
   void initState() {
     super.initState();
     requestLocationPermission();
+    _checkLocationPermission(); //check status of permission
     subscribeUserLocationUpdates();
 
     getPolylinesFromFirestore(context).then((polylines) {
       setState(() {
         mappolylines = polylines.toSet();
       });
+    });
+  }
+
+  Future<void> _checkLocationPermission() async {
+    PermissionStatus permissionStatus = await Permission.location.status;
+    setState(() {
+      _locationEnabled = permissionStatus == PermissionStatus.granted;
     });
   }
 
@@ -425,42 +435,47 @@ class _Mapsinterface extends State<Mapsinterface> {
                     Positioned(
                       bottom: 16,
                       right: 16,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Colors.black, // set the border color
-                            width: 1.0, // set the border width
-                          ),
-                          borderRadius: BorderRadius.circular(
-                              50.0), // set the border radius
-                        ),
-                        child: FloatingActionButton(
-                          heroTag: null,
-                          foregroundColor: const Color.fromARGB(255, 0, 0, 0),
-                          backgroundColor: secondaryColor,
-                          onPressed: () async {
-                            Position position =
-                                await Geolocator.getCurrentPosition(
-                                    desiredAccuracy: LocationAccuracy.high);
-                            LatLng currentLocation =
-                                LatLng(position.latitude, position.longitude);
-
-                            // Update the userLocation variable
-                            setState(() {
-                              userLocation = currentLocation;
-                            });
-
-                            final GoogleMapController controller =
-                                await _mapControllerCompleter.future;
-                            controller.animateCamera(
-                              CameraUpdate.newCameraPosition(
-                                CameraPosition(target: userLocation, zoom: 17),
+                      child: _locationEnabled
+                          ? Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Colors.black, // set the border color
+                                  width: 1.0, // set the border width
+                                ),
+                                borderRadius: BorderRadius.circular(
+                                    50.0), // set the border radius
                               ),
-                            );
-                          },
-                          child: const Icon(Icons.location_searching),
-                        ),
-                      ),
+                              child: FloatingActionButton(
+                                heroTag: null,
+                                foregroundColor:
+                                    const Color.fromARGB(255, 0, 0, 0),
+                                backgroundColor: secondaryColor,
+                                onPressed: () async {
+                                  Position position =
+                                      await Geolocator.getCurrentPosition(
+                                          desiredAccuracy:
+                                              LocationAccuracy.high);
+                                  LatLng currentLocation = LatLng(
+                                      position.latitude, position.longitude);
+
+                                  // Update the userLocation variable
+                                  setState(() {
+                                    userLocation = currentLocation;
+                                  });
+
+                                  final GoogleMapController controller =
+                                      await _mapControllerCompleter.future;
+                                  controller.animateCamera(
+                                    CameraUpdate.newCameraPosition(
+                                      CameraPosition(
+                                          target: userLocation, zoom: 17),
+                                    ),
+                                  );
+                                },
+                                child: const Icon(Icons.location_searching),
+                              ),
+                            )
+                          : Container(),
                     ),
 
                     //TOGGLE DIRECTIONS APPERANCE FAB

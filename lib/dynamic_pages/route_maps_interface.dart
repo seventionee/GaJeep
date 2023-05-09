@@ -18,6 +18,7 @@ import '../providers/jeep_info.dart';
 import '../pages/routes_directory.dart';
 import '../pages/mapsinterface.dart';
 import '../dynamic_pages/fare_calculator_map.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class RouteMapInterface extends StatefulWidget {
   static const routeName = '/routemapinterface';
@@ -41,6 +42,7 @@ class _RouteMapInterface extends State<RouteMapInterface> {
   late LatLng userLocation = const LatLng(10.298333, 123.893366);
   late LatLng initialPosition;
   List<LatLng> polylinePoints = [];
+  bool _locationEnabled = false;
   final bool _showUserLocation = false;
   StreamSubscription<Position>?
       positionStreamSubscription; //constantly check user position
@@ -97,6 +99,7 @@ class _RouteMapInterface extends State<RouteMapInterface> {
   void initState() {
     super.initState();
     requestLocationPermission();
+    _checkLocationPermission();
     subscribeUserLocationUpdates();
     initialPosition = widget.initialPosition;
 
@@ -129,6 +132,13 @@ class _RouteMapInterface extends State<RouteMapInterface> {
       setState(() {
         _currentDirectionOrientation = directionOrientation;
       });
+    });
+  }
+
+  Future<void> _checkLocationPermission() async {
+    PermissionStatus permissionStatus = await Permission.location.status;
+    setState(() {
+      _locationEnabled = permissionStatus == PermissionStatus.granted;
     });
   }
 
@@ -527,43 +537,47 @@ class _RouteMapInterface extends State<RouteMapInterface> {
                       Positioned(
                         bottom: 16,
                         right: 16,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Colors.black, // set the border color
-                              width: 1.0, // set the border width
-                            ),
-                            borderRadius: BorderRadius.circular(
-                                50.0), // set the border radius
-                          ),
-                          child: FloatingActionButton(
-                            heroTag: null,
-                            foregroundColor: const Color.fromARGB(255, 0, 0, 0),
-                            backgroundColor: secondaryColor,
-                            onPressed: () async {
-                              Position position =
-                                  await Geolocator.getCurrentPosition(
-                                      desiredAccuracy: LocationAccuracy.high);
-                              LatLng currentLocation =
-                                  LatLng(position.latitude, position.longitude);
-
-                              // Update the userLocation variable
-                              setState(() {
-                                userLocation = currentLocation;
-                              });
-
-                              final GoogleMapController controller =
-                                  await _mapControllerCompleter.future;
-                              controller.animateCamera(
-                                CameraUpdate.newCameraPosition(
-                                  CameraPosition(
-                                      target: userLocation, zoom: 17),
+                        child: _locationEnabled
+                            ? Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: Colors.black, // set the border color
+                                    width: 1.0, // set the border width
+                                  ),
+                                  borderRadius: BorderRadius.circular(
+                                      50.0), // set the border radius
                                 ),
-                              );
-                            },
-                            child: const Icon(Icons.location_searching),
-                          ),
-                        ),
+                                child: FloatingActionButton(
+                                  heroTag: null,
+                                  foregroundColor:
+                                      const Color.fromARGB(255, 0, 0, 0),
+                                  backgroundColor: secondaryColor,
+                                  onPressed: () async {
+                                    Position position =
+                                        await Geolocator.getCurrentPosition(
+                                            desiredAccuracy:
+                                                LocationAccuracy.high);
+                                    LatLng currentLocation = LatLng(
+                                        position.latitude, position.longitude);
+
+                                    // Update the userLocation variable
+                                    setState(() {
+                                      userLocation = currentLocation;
+                                    });
+
+                                    final GoogleMapController controller =
+                                        await _mapControllerCompleter.future;
+                                    controller.animateCamera(
+                                      CameraUpdate.newCameraPosition(
+                                        CameraPosition(
+                                            target: userLocation, zoom: 17),
+                                      ),
+                                    );
+                                  },
+                                  child: const Icon(Icons.location_searching),
+                                ),
+                              )
+                            : Container(),
                       ),
 
                       //TOGGLE DIRECTIONS APPERANCE FAB
