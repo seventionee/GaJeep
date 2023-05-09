@@ -30,7 +30,9 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => VehicleLocationProvider()),
+        ChangeNotifierProvider(
+            create: (context) =>
+                VehicleLocationProvider(mappolylines: Set.identity())),
       ],
       child: const ConnectivityPromptScreen(child: MyApp()),
     ),

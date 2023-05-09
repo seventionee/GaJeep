@@ -48,3 +48,31 @@ class _SplashScreenWithCallbackState extends State<SplashScreenWithCallback> {
     );
   }
 }
+
+class LoadingSplashScreen extends StatelessWidget {
+  const LoadingSplashScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'asset/logo/gajeep_logo1.png',
+              fit: BoxFit.cover,
+              width: 250,
+              height: 250,
+            ),
+            const SizedBox(height: 16),
+            const CircularProgressIndicator(
+              color: primaryColor,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

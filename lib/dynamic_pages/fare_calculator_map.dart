@@ -10,8 +10,6 @@ import '../providers/request_location_permission.dart';
 import '../component/constants.dart';
 import '../pages/learnmore.dart';
 import '../providers/route_polylines.dart';
-import '../providers/jeeps_location.dart';
-import 'package:provider/provider.dart';
 import '../pages/routes_directory.dart';
 import '../pages/mapsinterface.dart';
 import 'package:geocoding/geocoding.dart';
@@ -139,14 +137,6 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
         _currentDirectionOrientation = directionOrientation;
       });
     });
-  }
-
-  //toggling routes visibility via FAB
-
-  void updateMapController(
-      BuildContext context, GoogleMapController controller) {
-    Provider.of<VehicleLocationProvider>(context, listen: false)
-        .updateMapController(controller);
   }
 
   //constantly check user location
@@ -603,7 +593,7 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
                     },
                     onMapCreated: (GoogleMapController controller) async {
                       _mapControllerCompleter.complete(controller);
-                      updateMapController(context, controller);
+
                       controller.setMapStyle(snapshot.data!);
                     },
                     compassEnabled: false,
