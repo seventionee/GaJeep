@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter/services.dart';
+import 'package:flutter_app_1/providers/connectivity.dart';
 import 'learnmore.dart';
 import 'mapsinterface.dart';
 import '../providers/request_location_permission.dart';
@@ -142,94 +143,100 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     timeDilation = 1.5;
-    return Scaffold(
-      body: Center(
-          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Image.asset(
-          'asset/logo/gajeep_logo1.png',
-          fit: BoxFit.cover,
-          width: 250,
-          height: 250,
-        ),
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: Colors.black, // set the border color
-              width: 1.0, // set the border width
-            ),
-            borderRadius: BorderRadius.circular(25.0), // set the border radius
+    return showPromptScreen(
+      context,
+      Scaffold(
+        body: Center(
+            child:
+                Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Image.asset(
+            'asset/logo/gajeep_logo1.png',
+            fit: BoxFit.cover,
+            width: 250,
+            height: 250,
           ),
-          child: ElevatedButton(
-            onPressed: () {
-              // Show the splash screen before navigating
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (BuildContext context) => SplashScreenWithCallback(
-                  onComplete: () {
-                    Navigator.pop(context); // Close the splash screen dialog
-                    Navigator.pushNamed(
-                      context,
-                      Mapsinterface.routeName,
-                      arguments: const LatLng(10.3156173, 123.882969),
-                    );
-                  },
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Colors.black, // set the border color
+                width: 1.0, // set the border width
+              ),
+              borderRadius:
+                  BorderRadius.circular(25.0), // set the border radius
+            ),
+            child: ElevatedButton(
+              onPressed: () {
+                // Show the splash screen before navigating
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) => SplashScreenWithCallback(
+                    onComplete: () {
+                      Navigator.pop(context); // Close the splash screen dialog
+                      Navigator.pushNamed(
+                        context,
+                        Mapsinterface.routeName,
+                        arguments: const LatLng(10.3156173, 123.882969),
+                      );
+                    },
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(100, 50),
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(25.0), // set the corner radius
+                ), // increase the minimum width and height
+              ),
+              child: const Text(
+                'Get Started',
+                style: TextStyle(
+                  fontFamily: 'Epilogue',
+                  fontWeight: FontWeight.w400,
+                  fontSize: 20.0,
+                  color: Colors.black,
                 ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              minimumSize: const Size(100, 50),
-              shape: RoundedRectangleBorder(
-                borderRadius:
-                    BorderRadius.circular(25.0), // set the corner radius
-              ), // increase the minimum width and height
-            ),
-            child: const Text(
-              'Get Started',
-              style: TextStyle(
-                fontFamily: 'Epilogue',
-                fontWeight: FontWeight.w400,
-                fontSize: 20.0,
-                color: Colors.black,
               ),
             ),
           ),
-        ),
-        const SizedBox(height: 30.0),
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: Colors.black, // set the border color
-              width: 1.0, // set the border width
+          const SizedBox(height: 30.0),
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Colors.black, // set the border color
+                width: 1.0, // set the border width
+              ),
+              borderRadius:
+                  BorderRadius.circular(25.0), // set the border radius
             ),
-            borderRadius: BorderRadius.circular(25.0), // set the border radius
-          ),
-          child: ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pushNamed(
-                LearnMorePage.routeName,
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              minimumSize: const Size(100, 50),
-              backgroundColor: Theme.of(context).colorScheme.secondary,
-              shape: RoundedRectangleBorder(
-                borderRadius:
-                    BorderRadius.circular(25.0), // set the corner radius
-              ), // increase the minimum width and height
-            ),
-            child: const Text(
-              'Learn More',
-              style: TextStyle(
-                fontFamily: 'Epilogue', //font style
-                fontWeight: FontWeight.w400,
-                fontSize: 20.0,
-                color: Colors.black,
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pushNamed(
+                  LearnMorePage.routeName,
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(100, 50),
+                backgroundColor: Theme.of(context).colorScheme.secondary,
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(25.0), // set the corner radius
+                ), // increase the minimum width and height
+              ),
+              child: const Text(
+                'Learn More',
+                style: TextStyle(
+                  fontFamily: 'Epilogue', //font style
+                  fontWeight: FontWeight.w400,
+                  fontSize: 20.0,
+                  color: Colors.black,
+                ),
               ),
             ),
           ),
-        ),
-      ])),
+        ])),
+      ),
     );
   }
 }
