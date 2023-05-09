@@ -39,7 +39,7 @@ dependencies:
   geolocator: ^9.0.2
   permission_handler: ^10.2.0
   search_map_place_updated: ^0.0.4
-  connectivity_plus: ^3.0.3
+  connectivity_plus: ^4.0.0
   google_maps_webservice: ^0.0.20-nullsafety.5
   flutter_dotenv: ^5.0.2
   google_maps_flutter: ^2.1.1

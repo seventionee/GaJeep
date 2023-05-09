@@ -11,6 +11,7 @@ import 'dynamic_pages/route_details_screen.dart';
 import 'dynamic_pages/route_maps_interface.dart';
 import 'dynamic_pages/fare_calculator_map.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'providers/connectivity.dart';
 
 //STARTING THE FLUTTER APP
 void main() async {
@@ -31,7 +32,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (context) => VehicleLocationProvider()),
       ],
-      child: const MyApp(),
+      child: const ConnectivityPromptScreen(child: MyApp()),
     ),
   );
 }
