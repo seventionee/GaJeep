@@ -35,6 +35,8 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
 
   bool _useRoutePoints1 = false; //for toggling route orientation polylines
   Set<Polyline> mappolylines = {};
+  Set<Marker> mapMarkers = {};
+
   List<LatLng> polylinePoints = [];
   final List<LatLng> _selectedPoints = [];
   final Set<Marker> _markers = {};
@@ -117,6 +119,16 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
         if (polylines.isNotEmpty) {
           polylinePoints = polylines.first.points;
         }
+      });
+    });
+
+    getMarkersforCalculator(
+      context,
+      selectedRoute: widget.selectedRoute,
+      useRoutePoints1: _useRoutePoints1,
+    ).then((markers) {
+      setState(() {
+        mapMarkers = markers.toSet();
       });
     });
 
@@ -587,7 +599,7 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
                 children: [
                   GoogleMap(
                     onTap: _handleTap,
-                    markers: _markers,
+                    markers: {...mapMarkers, ..._markers},
                     onCameraMove: (position) {
                       // Removed reference to vehicleLocationProvider
                     },
@@ -706,6 +718,7 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
                                   await getDirectionOrientation(
                                       widget.selectedRoute, _useRoutePoints1);
 
+                              //rebuilding polylines upon toggle
                               List<Polyline> newPolylines =
                                   // ignore: use_build_context_synchronously
                                   await getPolylineforCalculator(context,
@@ -716,6 +729,15 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
                                 if (newPolylines.isNotEmpty) {
                                   polylinePoints = newPolylines.first.points;
                                 }
+                              });
+
+                              List<Marker> newMarker =
+                                  // ignore: use_build_context_synchronously
+                                  await getMarkersforCalculator(context,
+                                      selectedRoute: widget.selectedRoute,
+                                      useRoutePoints1: _useRoutePoints1);
+                              setState(() {
+                                mapMarkers = newMarker.toSet();
                               });
                             },
                             child: const Icon(Icons.mode_of_travel)),
