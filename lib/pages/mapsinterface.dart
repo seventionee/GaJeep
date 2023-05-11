@@ -213,8 +213,7 @@ class _Mapsinterface extends State<Mapsinterface> {
                 }
 
                 return ChangeNotifierProvider<VehicleLocationProvider>(
-                  create: (_) =>
-                      VehicleLocationProvider(mappolylines: mappolylines),
+                  create: (_) => VehicleLocationProvider(),
                   child: FutureBuilder(
                     future: getJsonFile('asset/mapstyle.json'),
                     builder: (context, snapshot) {

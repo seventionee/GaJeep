@@ -244,9 +244,8 @@ class _RouteMapInterface extends State<RouteMapInterface> {
               }
 
               return ChangeNotifierProvider<VehicleLocationProvider>(
-                create: (_) => VehicleLocationProvider(
-                    routeFilter: widget.selectedRoute,
-                    mappolylines: mappolylines),
+                create: (_) =>
+                    VehicleLocationProvider(routeFilter: widget.selectedRoute),
                 child: FutureBuilder(
                   future: getJsonFile('asset/mapstyle.json'),
                   builder: (context, snapshot) {
