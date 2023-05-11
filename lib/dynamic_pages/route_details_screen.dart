@@ -265,7 +265,7 @@ class _RouteDetailsState extends State<RouteDetails> {
                                           ),
                                         ),
                                         subtitle: Text(
-                                          'Capacity Status: $capacityStatus',
+                                          'Available Seats: $capacityStatus',
                                           style: const TextStyle(
                                             fontFamily: 'Epilogue',
                                             fontWeight: FontWeight.w400,

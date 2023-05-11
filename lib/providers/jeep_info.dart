@@ -169,7 +169,7 @@ class VehicleInfoWidgetState extends State<VehicleInfoWidget> {
                             fontSize: 15,
                             color: Colors.black,
                           )),
-                      Text('Capacity Status: ${widget.capacityStatus}',
+                      Text('Available Seats: ${widget.capacityStatus}',
                           style: const TextStyle(
                             fontFamily: 'Epilogue',
                             fontWeight: FontWeight.w400,
