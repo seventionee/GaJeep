@@ -40,6 +40,7 @@ class _RouteMapInterface extends State<RouteMapInterface> {
   bool _useRoutePoints1 = false;
   String _currentDirectionDescription = '';
   String _currentDirectionOrientation = '';
+  Set<Marker> mapMarkers = {};
   late LatLng userLocation = const LatLng(10.298333, 123.893366);
   late LatLng initialPosition;
   List<LatLng> polylinePoints = [];
@@ -114,6 +115,16 @@ class _RouteMapInterface extends State<RouteMapInterface> {
         if (polylines.isNotEmpty) {
           polylinePoints = polylines.first.points;
         }
+      });
+    });
+
+    getDirectionMarkers(
+      context,
+      selectedRoute: widget.selectedRoute,
+      useRoutePoints1: _useRoutePoints1,
+    ).then((markers) {
+      setState(() {
+        mapMarkers = markers.toSet();
       });
     });
 
@@ -233,9 +244,8 @@ class _RouteMapInterface extends State<RouteMapInterface> {
               }
 
               return ChangeNotifierProvider<VehicleLocationProvider>(
-                create: (_) => VehicleLocationProvider(
-                    routeFilter: widget.selectedRoute,
-                    mappolylines: mappolylines),
+                create: (_) =>
+                    VehicleLocationProvider(routeFilter: widget.selectedRoute),
                 child: FutureBuilder(
                   future: getJsonFile('asset/mapstyle.json'),
                   builder: (context, snapshot) {
@@ -484,9 +494,12 @@ class _RouteMapInterface extends State<RouteMapInterface> {
                                       mapToolbarEnabled: false,
                                       polylines:
                                           _isrouteshown ? mappolylines : {},
-                                      markers: vehicleLocationProvider
-                                          .vehicleMarkers.values
-                                          .toSet(),
+                                      markers: {
+                                        ...mapMarkers,
+                                        ...vehicleLocationProvider
+                                            .vehicleMarkers.values
+                                            .toSet()
+                                      },
                                     ),
                                     if (vehicleLocationProvider
                                             .selectedMarkerId !=
@@ -655,6 +668,18 @@ class _RouteMapInterface extends State<RouteMapInterface> {
                                             polylinePoints =
                                                 newPolylines.first.points;
                                           }
+                                        });
+
+                                        //for rebuilding direction markers
+                                        List<Marker> newMarker =
+                                            // ignore: use_build_context_synchronously
+                                            await getDirectionMarkers(context,
+                                                selectedRoute:
+                                                    widget.selectedRoute,
+                                                useRoutePoints1:
+                                                    _useRoutePoints1);
+                                        setState(() {
+                                          mapMarkers = newMarker.toSet();
                                         });
                                       },
                                       child: const Icon(Icons.mode_of_travel)),

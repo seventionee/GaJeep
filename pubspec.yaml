@@ -80,6 +80,7 @@ flutter:
   assets:
     - asset/logo/gajeep_logo1.png
     - asset/icons/jeep_up.png
+    - asset/icons/arrow_up.png
     - asset/mapstyle.json
     - asset/drawerheaderbackground1.png
     - asset/drawerheaderbackground1white.png

@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
+import 'dart:math';
 import '../providers/route_details.dart';
 
 Stream<int> getActiveVehiclesForRoute(String routeNumber) async* {
@@ -155,6 +156,79 @@ Future<List<Polyline>> getPolylinesFromFirestore(BuildContext context) async {
   return polylines;
 }
 
+Future<List<Marker>> getDirectionMarkersforAll(BuildContext context) async {
+  List<Marker> markers = [];
+  int markerIdCounter = 1;
+  Future<BitmapDescriptor> directionMarker() async {
+    return await BitmapDescriptor.fromAssetImage(
+      const ImageConfiguration(devicePixelRatio: 2.5),
+      'asset/icons/arrow_up.png',
+    );
+  }
+
+  CollectionReference collection =
+      FirebaseFirestore.instance.collection('Routes');
+  QuerySnapshot querySnapshot = await collection.get();
+
+  //for ROUTE POINTS 1
+  for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+    String routeNumber = (doc['Route Number']);
+    debugPrint('Show polyline $routeNumber');
+    List<GeoPoint> geoPoints = List.from(doc['Route Points 1']);
+
+    List<LatLng> latLngPoints = geoPoints
+        .map((point) => LatLng(point.latitude, point.longitude))
+        .toList();
+    debugPrint('Polyline fetch for $routeNumber: $latLngPoints');
+    debugPrint('Polyline fetch for $routeNumber: $latLngPoints');
+    final directionIcon = await directionMarker();
+    for (int i = 10; i < latLngPoints.length; i += 50) {
+      // Change 10 to whatever interval you want
+
+      Marker marker = Marker(
+        markerId: MarkerId((markerIdCounter++).toString()),
+        anchor: const Offset(0, 0.25),
+        position: latLngPoints[i],
+        icon: directionIcon,
+        rotation: i < latLngPoints.length - 1
+            ? getBearing(latLngPoints[i], latLngPoints[i + 1])
+            : 0,
+      );
+      debugPrint('Marker has been added for ALL $marker');
+      markers.add(marker);
+    }
+  }
+
+  //for ROUTE POINTS 2
+  for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+    String routeNumber = (doc['Route Number']);
+    debugPrint('Show polyline $routeNumber');
+
+    List<GeoPoint> geoPoints = List.from(doc['Route Points 2']);
+    List<LatLng> latLngPoints = geoPoints
+        .map((point) => LatLng(point.latitude, point.longitude))
+        .toList();
+    debugPrint('Polyline fetch for $routeNumber: $latLngPoints');
+    final directionIcon = await directionMarker();
+    for (int i = 10; i < latLngPoints.length; i += 50) {
+      // Change 10 to whatever interval you want
+
+      Marker marker = Marker(
+        markerId: MarkerId((markerIdCounter++).toString()),
+        anchor: const Offset(0, 0.25),
+        position: latLngPoints[i],
+        icon: directionIcon,
+        rotation: i < latLngPoints.length - 1
+            ? getBearing(latLngPoints[i], latLngPoints[i + 1])
+            : 0,
+      );
+      debugPrint('Marker has been added for ALL $marker');
+      markers.add(marker);
+    }
+  }
+  return markers;
+}
+
 Future<List<Polyline>> getPolylineForSpecificRoute(BuildContext context,
     {String? selectedRoute, required bool useRoutePoints1}) async {
   List<Polyline> polylines = [];
@@ -238,6 +312,8 @@ Future<List<Polyline>> getPolylineforCalculator(BuildContext context,
   int numPolylines = querySnapshot.docs.length;
   double hueStep = 360 / numPolylines;
 
+  // Ensure you have an arrow image in your assets
+
   for (QueryDocumentSnapshot doc in querySnapshot.docs) {
     if ((doc['Route Number']) == selectedRoute) {
       List<GeoPoint> geoPoints = useRoutePoints1
@@ -273,10 +349,78 @@ Future<List<Polyline>> getPolylineforCalculator(BuildContext context,
       );
 
       polylines.add(polyline);
+
       polylineIdCounter++;
     }
   }
   return polylines;
+}
+
+Future<List<Marker>> getDirectionMarkers(BuildContext context,
+    {String? selectedRoute, required bool useRoutePoints1}) async {
+  List<Marker> markers = [];
+  int markerIdCounter = 1;
+
+  CollectionReference collection =
+      FirebaseFirestore.instance.collection('Routes');
+  QuerySnapshot querySnapshot = await collection.get();
+
+  Future<BitmapDescriptor> directionMarker() async {
+    return await BitmapDescriptor.fromAssetImage(
+      const ImageConfiguration(devicePixelRatio: 2.5),
+      'asset/icons/arrow_up.png',
+    );
+  } // Ensure you have an arrow image in your assets
+
+  for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+    if ((doc['Route Number']) == selectedRoute) {
+      List<GeoPoint> geoPoints = useRoutePoints1
+          ? List.from(doc['Route Points 2'])
+          : List.from(doc['Route Points 1']);
+      List<LatLng> latLngPoints = geoPoints
+          .map((point) => LatLng(point.latitude, point.longitude))
+          .toList();
+      final directionIcon = await directionMarker();
+      // Add markers for direction indication
+      for (int i = 10; i < latLngPoints.length; i += 50) {
+        // Change 10 to whatever interval you want
+
+        Marker marker = Marker(
+          markerId: MarkerId((markerIdCounter++).toString()),
+          anchor: const Offset(0, 0.25),
+          position: latLngPoints[i],
+          icon: directionIcon,
+          rotation: i < latLngPoints.length - 1
+              ? getBearing(latLngPoints[i], latLngPoints[i + 1])
+              : 0,
+        );
+        debugPrint('Marker has been added for main map $marker');
+        markers.add(marker);
+      }
+    }
+  }
+  return markers;
+}
+
+//getting bearing for markers
+double getBearing(LatLng from, LatLng to) {
+  double deltaLong = to.longitude - from.longitude;
+  double lat1 = toRadians(from.latitude);
+  double lat2 = toRadians(to.latitude);
+  double longDelta = toRadians(deltaLong);
+
+  double y = sin(longDelta) * cos(lat2);
+  double x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(longDelta);
+
+  return ((toDegrees(atan2(y, x)) + 360) % 360);
+}
+
+double toRadians(double degree) {
+  return degree * pi / 180;
+}
+
+double toDegrees(double radian) {
+  return radian * 180 / pi;
 }
 
 Future<String> getDirectionDescription(
