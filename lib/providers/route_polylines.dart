@@ -156,6 +156,79 @@ Future<List<Polyline>> getPolylinesFromFirestore(BuildContext context) async {
   return polylines;
 }
 
+Future<List<Marker>> getDirectionMarkersforAll(BuildContext context) async {
+  List<Marker> markers = [];
+  int markerIdCounter = 1;
+  Future<BitmapDescriptor> directionMarker() async {
+    return await BitmapDescriptor.fromAssetImage(
+      const ImageConfiguration(devicePixelRatio: 2.5),
+      'asset/icons/arrow_up.png',
+    );
+  }
+
+  CollectionReference collection =
+      FirebaseFirestore.instance.collection('Routes');
+  QuerySnapshot querySnapshot = await collection.get();
+
+  //for ROUTE POINTS 1
+  for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+    String routeNumber = (doc['Route Number']);
+    debugPrint('Show polyline $routeNumber');
+    List<GeoPoint> geoPoints = List.from(doc['Route Points 1']);
+
+    List<LatLng> latLngPoints = geoPoints
+        .map((point) => LatLng(point.latitude, point.longitude))
+        .toList();
+    debugPrint('Polyline fetch for $routeNumber: $latLngPoints');
+    debugPrint('Polyline fetch for $routeNumber: $latLngPoints');
+    final directionIcon = await directionMarker();
+    for (int i = 10; i < latLngPoints.length; i += 50) {
+      // Change 10 to whatever interval you want
+
+      Marker marker = Marker(
+        markerId: MarkerId((markerIdCounter++).toString()),
+        anchor: const Offset(0, 0.25),
+        position: latLngPoints[i],
+        icon: directionIcon,
+        rotation: i < latLngPoints.length - 1
+            ? getBearing(latLngPoints[i], latLngPoints[i + 1])
+            : 0,
+      );
+      debugPrint('Marker has been added for ALL $marker');
+      markers.add(marker);
+    }
+  }
+
+  //for ROUTE POINTS 2
+  for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+    String routeNumber = (doc['Route Number']);
+    debugPrint('Show polyline $routeNumber');
+
+    List<GeoPoint> geoPoints = List.from(doc['Route Points 2']);
+    List<LatLng> latLngPoints = geoPoints
+        .map((point) => LatLng(point.latitude, point.longitude))
+        .toList();
+    debugPrint('Polyline fetch for $routeNumber: $latLngPoints');
+    final directionIcon = await directionMarker();
+    for (int i = 10; i < latLngPoints.length; i += 50) {
+      // Change 10 to whatever interval you want
+
+      Marker marker = Marker(
+        markerId: MarkerId((markerIdCounter++).toString()),
+        anchor: const Offset(0, 0.25),
+        position: latLngPoints[i],
+        icon: directionIcon,
+        rotation: i < latLngPoints.length - 1
+            ? getBearing(latLngPoints[i], latLngPoints[i + 1])
+            : 0,
+      );
+      debugPrint('Marker has been added for ALL $marker');
+      markers.add(marker);
+    }
+  }
+  return markers;
+}
+
 Future<List<Polyline>> getPolylineForSpecificRoute(BuildContext context,
     {String? selectedRoute, required bool useRoutePoints1}) async {
   List<Polyline> polylines = [];
@@ -283,7 +356,7 @@ Future<List<Polyline>> getPolylineforCalculator(BuildContext context,
   return polylines;
 }
 
-Future<List<Marker>> getMarkersforCalculator(BuildContext context,
+Future<List<Marker>> getDirectionMarkers(BuildContext context,
     {String? selectedRoute, required bool useRoutePoints1}) async {
   List<Marker> markers = [];
   int markerIdCounter = 1;
@@ -314,13 +387,14 @@ Future<List<Marker>> getMarkersforCalculator(BuildContext context,
 
         Marker marker = Marker(
           markerId: MarkerId((markerIdCounter++).toString()),
+          anchor: const Offset(0, 0.25),
           position: latLngPoints[i],
           icon: directionIcon,
           rotation: i < latLngPoints.length - 1
               ? getBearing(latLngPoints[i], latLngPoints[i + 1])
               : 0,
         );
-        debugPrint('Marker has been added $marker');
+        debugPrint('Marker has been added for main map $marker');
         markers.add(marker);
       }
     }
@@ -328,6 +402,7 @@ Future<List<Marker>> getMarkersforCalculator(BuildContext context,
   return markers;
 }
 
+//getting bearing for markers
 double getBearing(LatLng from, LatLng to) {
   double deltaLong = to.longitude - from.longitude;
   double lat1 = toRadians(from.latitude);

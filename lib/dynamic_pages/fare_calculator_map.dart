@@ -122,7 +122,7 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
       });
     });
 
-    getMarkersforCalculator(
+    getDirectionMarkers(
       context,
       selectedRoute: widget.selectedRoute,
       useRoutePoints1: _useRoutePoints1,
@@ -599,7 +599,7 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
                 children: [
                   GoogleMap(
                     onTap: _handleTap,
-                    markers: {...mapMarkers, ..._markers},
+                    markers: {..._markers, ...mapMarkers},
                     onCameraMove: (position) {
                       // Removed reference to vehicleLocationProvider
                     },
@@ -733,7 +733,7 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
 
                               List<Marker> newMarker =
                                   // ignore: use_build_context_synchronously
-                                  await getMarkersforCalculator(context,
+                                  await getDirectionMarkers(context,
                                       selectedRoute: widget.selectedRoute,
                                       useRoutePoints1: _useRoutePoints1);
                               setState(() {

@@ -40,6 +40,7 @@ class _Mapsinterface extends State<Mapsinterface> {
   final bool _showUserLocation = false;
   StreamSubscription<Position>?
       positionStreamSubscription; //constantly check user position
+  Set<Marker> mapMarkers = {};
 
   //for maps style
   Future<String> getJsonFile(String path) async {
@@ -99,6 +100,12 @@ class _Mapsinterface extends State<Mapsinterface> {
     getPolylinesFromFirestore(context).then((polylines) {
       setState(() {
         mappolylines = polylines.toSet();
+      });
+    });
+
+    getDirectionMarkersforAll(context).then((markers) {
+      setState(() {
+        mapMarkers = markers.toSet();
       });
     });
   }
@@ -386,9 +393,18 @@ class _Mapsinterface extends State<Mapsinterface> {
                                         mapToolbarEnabled: false,
                                         polylines:
                                             _isrouteshown ? mappolylines : {},
-                                        markers: vehicleLocationProvider
-                                            .vehicleMarkers.values
-                                            .toSet(),
+                                        markers: _isrouteshown
+                                            ? {
+                                                ...mapMarkers,
+                                                ...vehicleLocationProvider
+                                                    .vehicleMarkers.values
+                                                    .toSet()
+                                              }
+                                            : {
+                                                ...vehicleLocationProvider
+                                                    .vehicleMarkers.values
+                                                    .toSet()
+                                              },
                                       ),
                                       if (vehicleLocationProvider
                                               .selectedMarkerId !=
