@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app_1/ease_of_use/location_permission.dart';
 import 'package:flutter_app_1/providers/connectivity.dart';
 import 'package:search_map_place_updated/search_map_place_updated.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -531,27 +532,10 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
                                 ),
                               );
                             } else {
-                              // Permission not granted again, handle accordingly
-                              // (e.g., show an error message)
                               // ignore: use_build_context_synchronously
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) => AlertDialog(
-                                  title: const Text('Location Permission'),
-                                  content: const Text(
-                                      'You have denied location permission. '
-                                      'Please enable location permission in settings to use this feature.'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () async {
-                                        SystemNavigator.pop();
-                                        await openAppSettings(); // Open app settings/permissions
-                                      },
-                                      child: const Text('OK'),
-                                    ),
-                                  ],
-                                ),
-                              );
+                              showLocationPermissionDialog(context, () async {
+                                // Open app settings/permissions
+                              });
                             }
                           }
                         },

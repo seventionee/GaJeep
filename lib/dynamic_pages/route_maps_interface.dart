@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app_1/dynamic_pages/route_details_screen.dart';
+import 'package:flutter_app_1/ease_of_use/location_permission.dart';
 import 'package:flutter_app_1/pages/fare_calculator_directory.dart';
 import 'package:flutter_app_1/providers/connectivity.dart';
 import 'package:flutter_app_1/providers/splashscreenwithcallback.dart';
@@ -644,29 +645,11 @@ class _RouteMapInterface extends State<RouteMapInterface> {
                                           ),
                                         );
                                       } else {
-                                        // Permission not granted again, handle accordingly
-                                        // (e.g., show an error message)
                                         // ignore: use_build_context_synchronously
-                                        showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) =>
-                                              AlertDialog(
-                                            title: const Text(
-                                                'Location Permission'),
-                                            content: const Text(
-                                                'You have denied location permission. '
-                                                'Please enable location permission in settings to use this feature.'),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () async {
-                                                  SystemNavigator.pop();
-                                                  await openAppSettings(); // Open app settings/permissions
-                                                },
-                                                child: const Text('OK'),
-                                              ),
-                                            ],
-                                          ),
-                                        );
+                                        showLocationPermissionDialog(context,
+                                            () async {
+                                          // Open app settings/permissions
+                                        });
                                       }
                                     }
                                   },
