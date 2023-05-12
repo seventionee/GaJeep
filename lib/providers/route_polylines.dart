@@ -188,7 +188,6 @@ Future<List<Marker>> getDirectionMarkersforAll(BuildContext context) async {
       Marker marker = Marker(
         markerId: MarkerId((markerIdCounter++).toString()),
         flat: true,
-        anchor: const Offset(0, 0.25),
         position: latLngPoints[i],
         icon: directionIcon,
         rotation: i < latLngPoints.length - 1
@@ -217,7 +216,6 @@ Future<List<Marker>> getDirectionMarkersforAll(BuildContext context) async {
       Marker marker = Marker(
         markerId: MarkerId((markerIdCounter++).toString()),
         flat: true,
-        anchor: const Offset(0, 0.25),
         position: latLngPoints[i],
         icon: directionIcon,
         rotation: i < latLngPoints.length - 1
