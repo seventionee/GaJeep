@@ -405,6 +405,63 @@ Future<List<Marker>> getDirectionMarkers(BuildContext context,
   return markers;
 }
 
+Future<List<Marker>> getDirectionMarkersforCalculator(BuildContext context,
+    {String? selectedRoute,
+    required bool useRoutePoints1,
+    required Function(LatLng) handleTap}) async {
+  List<Marker> markers = [];
+  int markerIdCounter = 1;
+
+  CollectionReference collection =
+      FirebaseFirestore.instance.collection('Routes');
+  QuerySnapshot querySnapshot = await collection.get();
+
+  Future<BitmapDescriptor> directionMarker() async {
+    return await BitmapDescriptor.fromAssetImage(
+      const ImageConfiguration(devicePixelRatio: 2.5),
+      'asset/icons/arrow_up.png',
+    );
+  } // Ensure you have an arrow image in your assets
+
+  for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+    if ((doc['Route Number']) == selectedRoute) {
+      List<GeoPoint> geoPoints = useRoutePoints1
+          ? List.from(doc['Route Points 2'])
+          : List.from(doc['Route Points 1']);
+      List<LatLng> latLngPoints = geoPoints
+          .map((point) => LatLng(point.latitude, point.longitude))
+          .toList();
+      final directionIcon = await directionMarker();
+      // Add markers for direction indication
+      for (int i = 10; i < latLngPoints.length; i += 60) {
+        // Change 10 to whatever interval you want
+
+        LatLng currentPoint = latLngPoints[i];
+
+        onTap() {
+          handleTap(currentPoint);
+        }
+
+        Marker marker = Marker(
+          markerId: MarkerId((markerIdCounter++).toString()),
+          flat: true,
+          anchor: const Offset(0, 0.25),
+          position: currentPoint,
+          icon: directionIcon,
+          consumeTapEvents: true,
+          onTap: onTap,
+          rotation: i < latLngPoints.length - 1
+              ? getBearing(latLngPoints[i], latLngPoints[i + 1])
+              : 0,
+        );
+        debugPrint('Marker has been added for main map $marker');
+        markers.add(marker);
+      }
+    }
+  }
+  return markers;
+}
+
 //getting bearing for markers
 double getBearing(LatLng from, LatLng to) {
   double deltaLong = to.longitude - from.longitude;

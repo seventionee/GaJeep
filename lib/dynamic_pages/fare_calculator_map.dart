@@ -87,10 +87,11 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
       });
     });
 
-    getDirectionMarkers(
+    getDirectionMarkersforCalculator(
       context,
       selectedRoute: widget.selectedRoute,
       useRoutePoints1: _useRoutePoints1,
+      handleTap: _handleTap,
     ).then((markers) {
       setState(() {
         mapMarkers = markers.toSet();
@@ -553,9 +554,11 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
 
                               List<Marker> newMarker =
                                   // ignore: use_build_context_synchronously
-                                  await getDirectionMarkers(context,
+                                  await getDirectionMarkersforCalculator(
+                                      context,
                                       selectedRoute: widget.selectedRoute,
-                                      useRoutePoints1: _useRoutePoints1);
+                                      useRoutePoints1: _useRoutePoints1,
+                                      handleTap: _handleTap);
                               setState(() {
                                 mapMarkers = newMarker.toSet();
                               });
