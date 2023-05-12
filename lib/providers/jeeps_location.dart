@@ -109,6 +109,7 @@ class VehicleLocationProvider with ChangeNotifier {
       LatLng position = LatLng(location.latitude, location.longitude);
       Marker marker = Marker(
         icon: jeepIcon,
+        flat: true,
         markerId: markerId,
         position: position,
         rotation: bearing,

@@ -187,6 +187,7 @@ Future<List<Marker>> getDirectionMarkersforAll(BuildContext context) async {
 
       Marker marker = Marker(
         markerId: MarkerId((markerIdCounter++).toString()),
+        flat: true,
         anchor: const Offset(0, 0.25),
         position: latLngPoints[i],
         icon: directionIcon,
@@ -215,6 +216,7 @@ Future<List<Marker>> getDirectionMarkersforAll(BuildContext context) async {
 
       Marker marker = Marker(
         markerId: MarkerId((markerIdCounter++).toString()),
+        flat: true,
         anchor: const Offset(0, 0.25),
         position: latLngPoints[i],
         icon: directionIcon,
@@ -382,11 +384,12 @@ Future<List<Marker>> getDirectionMarkers(BuildContext context,
           .toList();
       final directionIcon = await directionMarker();
       // Add markers for direction indication
-      for (int i = 10; i < latLngPoints.length; i += 50) {
+      for (int i = 10; i < latLngPoints.length; i += 60) {
         // Change 10 to whatever interval you want
 
         Marker marker = Marker(
           markerId: MarkerId((markerIdCounter++).toString()),
+          flat: true,
           anchor: const Offset(0, 0.25),
           position: latLngPoints[i],
           icon: directionIcon,

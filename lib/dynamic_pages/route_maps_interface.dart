@@ -467,7 +467,7 @@ class _RouteMapInterface extends State<RouteMapInterface> {
                                         vehicleLocationProvider
                                             .deselectMarker();
                                       },
-                                      rotateGesturesEnabled: false,
+                                      rotateGesturesEnabled: true,
                                       onCameraMove: (position) {
                                         onCameraMoveHandler(
                                             position, vehicleLocationProvider);

@@ -599,7 +599,7 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
                 children: [
                   GoogleMap(
                     onTap: _handleTap,
-                    markers: {..._markers, ...mapMarkers},
+                    markers: {...mapMarkers, ..._markers},
                     onCameraMove: (position) {
                       // Removed reference to vehicleLocationProvider
                     },
