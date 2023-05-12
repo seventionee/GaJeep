@@ -467,7 +467,7 @@ class _RouteMapInterface extends State<RouteMapInterface> {
                                         vehicleLocationProvider
                                             .deselectMarker();
                                       },
-                                      rotateGesturesEnabled: false,
+                                      rotateGesturesEnabled: true,
                                       onCameraMove: (position) {
                                         onCameraMoveHandler(
                                             position, vehicleLocationProvider);
@@ -571,52 +571,110 @@ class _RouteMapInterface extends State<RouteMapInterface> {
                             Positioned(
                               bottom: 16,
                               right: 16,
-                              child: _locationEnabled
-                                  ? Container(
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: Colors
-                                              .black, // set the border color
-                                          width: 1.0, // set the border width
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: Colors.black, // set the border color
+                                    width: 1.0, // set the border width
+                                  ),
+                                  borderRadius: BorderRadius.circular(
+                                      50.0), // set the border radius
+                                ),
+                                child: FloatingActionButton(
+                                  heroTag: null,
+                                  foregroundColor:
+                                      const Color.fromARGB(255, 0, 0, 0),
+                                  backgroundColor: secondaryColor,
+                                  onPressed: () async {
+                                    PermissionStatus permissionStatus =
+                                        await Permission.location.status;
+                                    if (permissionStatus ==
+                                        PermissionStatus.granted) {
+                                      Position position =
+                                          await Geolocator.getCurrentPosition(
+                                              desiredAccuracy:
+                                                  LocationAccuracy.high);
+                                      LatLng currentLocation = LatLng(
+                                          position.latitude,
+                                          position.longitude);
+
+                                      // Update the userLocation variable
+                                      setState(() {
+                                        userLocation = currentLocation;
+                                      });
+
+                                      final GoogleMapController controller =
+                                          await _mapControllerCompleter.future;
+                                      controller.animateCamera(
+                                        CameraUpdate.newCameraPosition(
+                                          CameraPosition(
+                                              target: userLocation, zoom: 17),
                                         ),
-                                        borderRadius: BorderRadius.circular(
-                                            50.0), // set the border radius
-                                      ),
-                                      child: FloatingActionButton(
-                                        heroTag: null,
-                                        foregroundColor:
-                                            const Color.fromARGB(255, 0, 0, 0),
-                                        backgroundColor: secondaryColor,
-                                        onPressed: () async {
-                                          Position position = await Geolocator
-                                              .getCurrentPosition(
-                                                  desiredAccuracy:
-                                                      LocationAccuracy.high);
-                                          LatLng currentLocation = LatLng(
-                                              position.latitude,
-                                              position.longitude);
+                                      );
+                                    } else {
+                                      // Request location permission again
+                                      await Permission.location.request();
+                                      // Check the updated permission status
+                                      PermissionStatus updatedStatus =
+                                          await Permission.location.status;
+                                      if (updatedStatus ==
+                                          PermissionStatus.granted) {
+                                        // Permission granted, perform the desired action
+                                        // (e.g., pan to user location)
+                                        Position position =
+                                            await Geolocator.getCurrentPosition(
+                                                desiredAccuracy:
+                                                    LocationAccuracy.high);
+                                        LatLng currentLocation = LatLng(
+                                            position.latitude,
+                                            position.longitude);
 
-                                          // Update the userLocation variable
-                                          setState(() {
-                                            userLocation = currentLocation;
-                                          });
+                                        // Update the userLocation variable
+                                        setState(() {
+                                          userLocation = currentLocation;
+                                        });
 
-                                          final GoogleMapController controller =
-                                              await _mapControllerCompleter
-                                                  .future;
-                                          controller.animateCamera(
-                                            CameraUpdate.newCameraPosition(
-                                              CameraPosition(
-                                                  target: userLocation,
-                                                  zoom: 17),
-                                            ),
-                                          );
-                                        },
-                                        child: const Icon(
-                                            Icons.location_searching),
-                                      ),
-                                    )
-                                  : Container(),
+                                        final GoogleMapController controller =
+                                            await _mapControllerCompleter
+                                                .future;
+                                        controller.animateCamera(
+                                          CameraUpdate.newCameraPosition(
+                                            CameraPosition(
+                                                target: userLocation, zoom: 17),
+                                          ),
+                                        );
+                                      } else {
+                                        // Permission not granted again, handle accordingly
+                                        // (e.g., show an error message)
+                                        // ignore: use_build_context_synchronously
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) =>
+                                              AlertDialog(
+                                            title: const Text(
+                                                'Location Permission'),
+                                            content: const Text(
+                                                'You have denied location permission. '
+                                                'Please enable location permission in settings to use this feature.'),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () async {
+                                                  SystemNavigator.pop();
+                                                  await openAppSettings(); // Open app settings/permissions
+                                                },
+                                                child: const Text('OK'),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  },
+                                  child: _locationEnabled
+                                      ? const Icon(Icons.location_searching)
+                                      : const Icon(Icons.location_disabled),
+                                ),
+                              ),
                             ),
 
                             //TOGGLE DIRECTIONS APPERANCE FAB

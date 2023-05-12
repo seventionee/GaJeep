@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app_1/providers/connectivity.dart';
-import 'dart:math';
 import 'package:search_map_place_updated/search_map_place_updated.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
 import 'package:geolocator/geolocator.dart';
 import '../providers/request_location_permission.dart';
 import '../component/constants.dart';
-import '../pages/learnmore.dart';
 import '../providers/route_polylines.dart';
-import '../pages/routes_directory.dart';
-import '../pages/mapsinterface.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class FareCalculatorMapInterface extends StatefulWidget {
   static const routeName = '/farecalculatormapinterface';
@@ -36,7 +33,7 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
   bool _useRoutePoints1 = false; //for toggling route orientation polylines
   Set<Polyline> mappolylines = {};
   Set<Marker> mapMarkers = {};
-
+  bool _locationEnabled = false;
   List<LatLng> polylinePoints = [];
   final List<LatLng> _selectedPoints = [];
   final Set<Marker> _markers = {};
@@ -46,7 +43,6 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
   bool _firstLoad = true;
   late LatLng userLocation = const LatLng(10.298333, 123.893366);
   late LatLng initialPosition;
-  final bool _showUserLocation = false;
   StreamSubscription<Position>?
       positionStreamSubscription; //constantly check user position
 
@@ -64,42 +60,11 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
     });
   }
 
-  Future<void> animateToInitialPosition(GoogleMapController controller) async {
-    if (_firstLoad) {
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        // Move the camera to the user's location or initial position.
-        LatLng target =
-            _showUserLocation ? userLocation : widget.initialcalculatorposition;
-        await controller.moveCamera(CameraUpdate.newCameraPosition(
-          CameraPosition(target: target, zoom: 17),
-        ));
-
-        // Animate the camera from the user's location to the initial position if necessary.
-        if (_showUserLocation) {
-          await controller.animateCamera(
-            CameraUpdate.newLatLngBounds(
-              LatLngBounds(
-                southwest: LatLng(
-                  min(userLocation.latitude,
-                      widget.initialcalculatorposition.latitude),
-                  min(userLocation.longitude,
-                      widget.initialcalculatorposition.longitude),
-                ),
-                northeast: LatLng(
-                  max(userLocation.latitude,
-                      widget.initialcalculatorposition.latitude),
-                  max(userLocation.longitude,
-                      widget.initialcalculatorposition.longitude),
-                ),
-              ),
-              100.0, // Add some padding around the locations.
-            ),
-          );
-        }
-
-        _firstLoad = false;
-      });
-    }
+  Future<void> _checkLocationPermission() async {
+    PermissionStatus permissionStatus = await Permission.location.status;
+    setState(() {
+      _locationEnabled = permissionStatus == PermissionStatus.granted;
+    });
   }
 
   @override
@@ -108,7 +73,7 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
     requestLocationPermission();
     subscribeUserLocationUpdates();
     initialPosition = widget.initialcalculatorposition;
-
+    _checkLocationPermission();
     getPolylineforCalculator(
       context,
       selectedRoute: widget.selectedRoute,
@@ -122,10 +87,11 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
       });
     });
 
-    getDirectionMarkers(
+    getDirectionMarkersforCalculator(
       context,
       selectedRoute: widget.selectedRoute,
       useRoutePoints1: _useRoutePoints1,
+      handleTap: _handleTap,
     ).then((markers) {
       setState(() {
         mapMarkers = markers.toSet();
@@ -443,155 +409,6 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
                 ],
               ),
             ),
-            drawer: Drawer(
-              child: ListView(
-                padding: EdgeInsets.zero,
-                //MENU
-                children: <Widget>[
-                  //MENU HEADER
-                  const DrawerHeader(
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image:
-                              AssetImage('asset/drawerheadernobackground.png'),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      child: null),
-                  //View All Routes On Map
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: const Color.fromARGB(255, 0, 0, 0),
-                          width: 1.0,
-                        ),
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(25.0)),
-                        color: primaryColor,
-                      ),
-                      child: ListTile(
-                        title: const Text(
-                          'View All Routes',
-                          style: TextStyle(
-                              fontFamily: 'Epilogue', //font style
-                              fontWeight: FontWeight.w400,
-                              fontSize: 20.0,
-                              color: Colors.black),
-                        ),
-                        tileColor: backgroundColor,
-                        leading:
-                            const Icon(Icons.map_outlined, color: Colors.black),
-                        onTap: () {
-                          Navigator.pushReplacementNamed(
-                            context,
-                            Mapsinterface.routeName,
-                            arguments: widget.initialcalculatorposition,
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                  //ROUTE DIRECTORY
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: const Color.fromARGB(255, 0, 0, 0),
-                          width: 1.0,
-                        ),
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(25.0)),
-                        color: primaryColor,
-                      ),
-                      child: ListTile(
-                        title: const Text(
-                          'Route Directory',
-                          style: TextStyle(
-                              fontFamily: 'Epilogue', //font style
-                              fontWeight: FontWeight.w400,
-                              fontSize: 20.0,
-                              color: Colors.black),
-                        ),
-                        tileColor: backgroundColor,
-                        leading: const Icon(
-                            Icons.directions_transit_filled_sharp,
-                            color: Colors.black),
-                        onTap: () {
-                          Navigator.of(context)
-                              .pushNamed(RoutesDirectory.routeName);
-                        },
-                      ),
-                    ),
-                  ),
-                  //FARE CALCULATOR
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: const Color.fromARGB(255, 0, 0, 0),
-                          width: 1.0,
-                        ),
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(25.0)),
-                        color: primaryColor,
-                      ),
-                      child: ListTile(
-                        title: const Text(
-                          'Fare Calculator',
-                          style: TextStyle(
-                            fontFamily: 'Epilogue', //font style
-                            fontWeight: FontWeight.w400,
-                            fontSize: 20.0,
-                            color: Colors.black,
-                          ),
-                        ),
-                        leading: const Icon(Icons.calculate_rounded,
-                            color: Colors.black),
-                        onTap: () {},
-                      ),
-                    ),
-                  ),
-                  //ABOUT GAJEEP
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: const Color.fromARGB(255, 0, 0, 0),
-                          width: 1.0,
-                        ),
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(25.0)),
-                        color: primaryColor,
-                      ),
-                      child: ListTile(
-                        title: const Text(
-                          'About GaJeep',
-                          style: TextStyle(
-                            fontFamily: 'Epilogue', //font style
-                            fontWeight: FontWeight.w400,
-                            fontSize: 20.0,
-                            color: Colors.black,
-                          ),
-                        ),
-                        leading: const Icon(Icons.info_outline_rounded,
-                            color: Colors.black),
-                        onTap: () {
-                          Navigator.of(context).pushNamed(
-                            LearnMorePage.routeName,
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            //END OF MENU DRAWER
 
             //REST OF INTERFACE
             body: Builder(builder: (context) {
@@ -599,7 +416,7 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
                 children: [
                   GoogleMap(
                     onTap: _handleTap,
-                    markers: {..._markers, ...mapMarkers},
+                    markers: {...mapMarkers, ..._markers},
                     onCameraMove: (position) {
                       // Removed reference to vehicleLocationProvider
                     },
@@ -664,26 +481,83 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
                         foregroundColor: const Color.fromARGB(255, 0, 0, 0),
                         backgroundColor: secondaryColor,
                         onPressed: () async {
-                          Position position =
-                              await Geolocator.getCurrentPosition(
-                                  desiredAccuracy: LocationAccuracy.high);
-                          LatLng currentLocation =
-                              LatLng(position.latitude, position.longitude);
+                          PermissionStatus permissionStatus =
+                              await Permission.location.status;
+                          if (permissionStatus == PermissionStatus.granted) {
+                            Position position =
+                                await Geolocator.getCurrentPosition(
+                                    desiredAccuracy: LocationAccuracy.high);
+                            LatLng currentLocation =
+                                LatLng(position.latitude, position.longitude);
 
-                          // Update the userLocation variable
-                          setState(() {
-                            userLocation = currentLocation;
-                          });
+                            // Update the userLocation variable
+                            setState(() {
+                              userLocation = currentLocation;
+                            });
 
-                          final GoogleMapController controller =
-                              await _mapControllerCompleter.future;
-                          controller.animateCamera(
-                            CameraUpdate.newCameraPosition(
-                              CameraPosition(target: userLocation, zoom: 15),
-                            ),
-                          );
+                            final GoogleMapController controller =
+                                await _mapControllerCompleter.future;
+                            controller.animateCamera(
+                              CameraUpdate.newCameraPosition(
+                                CameraPosition(target: userLocation, zoom: 17),
+                              ),
+                            );
+                          } else {
+                            // Request location permission again
+                            await Permission.location.request();
+                            // Check the updated permission status
+                            PermissionStatus updatedStatus =
+                                await Permission.location.status;
+                            if (updatedStatus == PermissionStatus.granted) {
+                              // Permission granted, perform the desired action
+                              // (e.g., pan to user location)
+                              Position position =
+                                  await Geolocator.getCurrentPosition(
+                                      desiredAccuracy: LocationAccuracy.high);
+                              LatLng currentLocation =
+                                  LatLng(position.latitude, position.longitude);
+
+                              // Update the userLocation variable
+                              setState(() {
+                                userLocation = currentLocation;
+                              });
+
+                              final GoogleMapController controller =
+                                  await _mapControllerCompleter.future;
+                              controller.animateCamera(
+                                CameraUpdate.newCameraPosition(
+                                  CameraPosition(
+                                      target: userLocation, zoom: 17),
+                                ),
+                              );
+                            } else {
+                              // Permission not granted again, handle accordingly
+                              // (e.g., show an error message)
+                              // ignore: use_build_context_synchronously
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) => AlertDialog(
+                                  title: const Text('Location Permission'),
+                                  content: const Text(
+                                      'You have denied location permission. '
+                                      'Please enable location permission in settings to use this feature.'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () async {
+                                        SystemNavigator.pop();
+                                        await openAppSettings(); // Open app settings/permissions
+                                      },
+                                      child: const Text('OK'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+                          }
                         },
-                        child: const Icon(Icons.location_searching),
+                        child: _locationEnabled
+                            ? const Icon(Icons.location_searching)
+                            : const Icon(Icons.location_disabled),
                       ),
                     ),
                   ),
@@ -733,9 +607,11 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
 
                               List<Marker> newMarker =
                                   // ignore: use_build_context_synchronously
-                                  await getDirectionMarkers(context,
+                                  await getDirectionMarkersforCalculator(
+                                      context,
                                       selectedRoute: widget.selectedRoute,
-                                      useRoutePoints1: _useRoutePoints1);
+                                      useRoutePoints1: _useRoutePoints1,
+                                      handleTap: _handleTap);
                               setState(() {
                                 mapMarkers = newMarker.toSet();
                               });
