@@ -87,6 +87,7 @@ flutter:
     - asset/drawerheadernobackground.png
     - asset/icons/location_pin.svg
     - asset/icons/location.svg
+    - asset/icons/calculate_pin.png
     - asset/userpermissionimages/LocationPermission1.jpg
     - asset/userpermissionimages/LocationPermission2.jpg
     - asset/userpermissionimages/LocationPermission3.jpg
