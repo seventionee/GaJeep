@@ -161,15 +161,23 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
     });
   }
 
+  Future<BitmapDescriptor> distanceMarker() async {
+    return await BitmapDescriptor.fromAssetImage(
+      const ImageConfiguration(devicePixelRatio: 2.5),
+      'asset/icons/calculate_pin.png',
+    );
+  }
+
   void _handleTap(LatLng tappedPoint) async {
     LatLng closestPoint = _getClosestPoint(tappedPoint, polylinePoints);
-
+    final distanceicon = await distanceMarker();
     if (_selectedPoints.length < 2) {
       setState(() {
         _selectedPoints.add(closestPoint);
         _markers.add(
           Marker(
             markerId: MarkerId(_selectedPoints.length.toString()),
+            icon: distanceicon,
             position: closestPoint,
           ),
         );
