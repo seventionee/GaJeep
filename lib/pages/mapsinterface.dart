@@ -17,6 +17,7 @@ import 'package:provider/provider.dart';
 import '../providers/jeep_info.dart';
 import 'routes_directory.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../ease_of_use/location_permission.dart';
 
 // ignore: use_key_in_widget_constructors
 class Mapsinterface extends StatefulWidget {
@@ -552,29 +553,11 @@ class _Mapsinterface extends State<Mapsinterface> {
                                             ),
                                           );
                                         } else {
-                                          // Permission not granted again, handle accordingly
-                                          // (e.g., show an error message)
                                           // ignore: use_build_context_synchronously
-                                          showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) =>
-                                                AlertDialog(
-                                              title: const Text(
-                                                  'Location Permission'),
-                                              content: const Text(
-                                                  'You have denied location permission. '
-                                                  'Please enable location permission in settings to use this feature.'),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () async {
-                                                    SystemNavigator.pop();
-                                                    await openAppSettings(); // Open app settings/permissions
-                                                  },
-                                                  child: const Text('OK'),
-                                                ),
-                                              ],
-                                            ),
-                                          );
+                                          showLocationPermissionDialog(context,
+                                              () async {
+                                            // Open app settings/permissions
+                                          });
                                         }
                                       }
                                     },
