@@ -155,7 +155,7 @@ class LearnMorePage extends StatelessWidget {
                           SizedBox(width: 16.0),
                           Expanded(
                             child: Text(
-                              'View Route infromations to familiarize with the routes',
+                              'View Route information to familiarize with the routes',
                               style: TextStyle(
                                 fontFamily: 'Epilogue',
                                 fontSize: 16.0,
