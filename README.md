@@ -1,16 +1,11 @@
-# flutter_app_1
+# GaJeep
 
-A new Flutter project.
+GaJeep is a mobile application that allows commuters to track the location of jeepneys in real-time. It also helps commuters calculate their fare based on distance travelled. Users can also view jeepney route information. GaJeep aims to positively influence the public transportation commuting experience.
 
-## Getting Started
+Features:
+- Real-time location tracking of available jeepneys
+- Real-time tracking of passenger capacity status of jeepneys
+- View Route information to familiarize with the routes
+- Accurately calculate fare based on current rates and actual distance travelled.
 
-This project is a starting point for a Flutter application.
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
