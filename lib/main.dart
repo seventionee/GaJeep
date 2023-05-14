@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app_1/ease_of_use/tutorial_map_interface.dart';
 import 'pages/learnmore.dart';
 import 'pages/mapsinterface.dart';
 import 'pages/routes_directory.dart';
@@ -69,7 +70,9 @@ class MyApp extends StatelessWidget {
           case RoutesDirectory.routeName:
             return MaterialPageRoute(
                 builder: (context) => const RoutesDirectory());
-
+          case FareCalculatorTutorial.routeName:
+            return MaterialPageRoute(
+                builder: (context) => const FareCalculatorTutorial());
           case FareCalculatorDirectory.routeName:
             return MaterialPageRoute(
                 builder: (context) => const FareCalculatorDirectory());
