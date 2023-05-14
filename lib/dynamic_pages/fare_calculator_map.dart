@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app_1/ease_of_use/location_permission.dart';
+import 'package:flutter_app_1/ease_of_use/tutorial_map_interface.dart';
 import 'package:flutter_app_1/providers/connectivity.dart';
 import 'package:search_map_place_updated/search_map_place_updated.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -553,6 +554,30 @@ class _FareCalculatorMapInterface extends State<FareCalculatorMapInterface> {
                       ),
                     ),
                   ),
+//tutorial button
+                  Positioned(
+                      bottom: 90,
+                      right: 16,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Colors.black, // set the border color
+                            width: 1.0, // set the border width
+                          ),
+                          borderRadius: BorderRadius.circular(
+                              50.0), // set the border radius
+                        ),
+                        child: FloatingActionButton(
+                            heroTag: null,
+                            foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+                            backgroundColor: primaryColor,
+                            onPressed: () async {
+                              Navigator.pushNamed(
+                                  context, FareCalculatorTutorial.routeName);
+                            },
+                            child: const Icon(Icons.help)),
+                      )),
+
                   //Toggle Route Orientation
                   Positioned(
                       bottom: 16,
